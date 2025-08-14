@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dob = trim($_POST['dob']); // Date validation is handled below
     $membership_type = filter_var(trim($_POST['membership_type']), FILTER_SANITIZE_STRING);
     $chess_experience = filter_var(trim($_POST['chess_experience']), FILTER_SANITIZE_STRING);
-    
+
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = 1;
@@ -71,20 +71,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // --- Email Notification Logic ---
         $mail = new PHPMailer(true);
         try {
-            //Server settings
+            // --- PHPMailer Configuration ---
             $mail->isSMTP();
-            $mail->Host       = 'sandbox.smtp.mailtrap.io';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = '06d977bf35aa13';
-            $mail->Password   = 'ef556c79ff96ea';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Host = 'mail.riseandshinechess.co.za';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'info@riseandshinechess.co.za';
+            $mail->Password = 'YOUR_EMAIL_PASSWORD_HERE'; // Replace with actual password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = 465;
 
             // --- Admin Notification Email ---
             $mail->setFrom('info@riseandshinechess.co.za', 'Rise and Shine Chess Club');
             $mail->addAddress('info@riseandshinechess.co.za', 'Admin'); // Send to admin
             $mail->addReplyTo($email, $name);
-            
+
             $mail->isHTML(true);
             $mail->Subject = 'New Membership Application: ' . $name;
             $mail->Body    = "A new membership application has been submitted.<br><br>" .
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // --- User Confirmation Email ---
             $mail->clearAddresses(); // Clear recipients for the next email
             $mail->addAddress($email, $name); // Send to the user
-            
+
             $mail->Subject = 'Your Membership Application has been Received!';
             $mail->Body    = "Dear {$name},<br><br>" .
                              "Thank you for applying for a membership at the Rise and Shine Chess Club! We have successfully received your application.<br><br>" .
@@ -136,4 +136,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: membership.php");
     exit();
 }
-?>

@@ -14,16 +14,16 @@ $mail = new PHPMailer(true);
 try {
     //Server settings
     $mail->isSMTP();
-    $mail->Host       = 'sandbox.smtp.mailtrap.io';
+    $mail->Host       = 'mail.riseandshinechess.co.za';
     $mail->SMTPAuth   = true;
-    $mail->Username   = '06d977bf35aa13';
-    $mail->Password   = 'ef556c79ff96ea';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+    $mail->Username   = 'info@riseandshinechess.co.za';
+    $mail->Password   = 'YOUR_EMAIL_PASSWORD_HERE'; // Replace with actual password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $mail->Port       = 465;
     $mail->SMTPDebug  = 2; // Enable verbose debug output
 
     //Recipients
-    $mail->setFrom('no-reply@riseandshinechess.co.za', 'Rise and Shine Chess Club');
+    $mail->setFrom('info@riseandshinechess.co.za', 'Rise and Shine Chess Club');
     $mail->addAddress('test@example.com', 'Test User');
 
     //Content

@@ -39,18 +39,18 @@ function send_template_email(string $template_id, array $member): bool {
 
     $mail = new PHPMailer(true);
     try {
-        // --- Use your actual SMTP settings ---
+        // --- Real SMTP settings ---
         $mail->isSMTP();
-        $mail->Host       = 'sandbox.smtp.mailtrap.io';
+        $mail->Host       = 'mail.riseandshinechess.co.za';
         $mail->SMTPAuth   = true;
-        $mail->Username   = '06d977bf35aa13';
-        $mail->Password   = 'ef556c79ff96ea';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Username   = 'info@riseandshinechess.co.za';
+        $mail->Password   = 'YOUR_EMAIL_PASSWORD_HERE'; // Replace with actual password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
 
-        $mail->setFrom('no-reply@riseandshinechessclub.com', 'Rise & Shine Chess Club');
+        $mail->setFrom('info@riseandshinechess.co.za', 'Rise & Shine Chess Club');
         $mail->addAddress($member['Email'], $member['Full Name']);
-        $mail->addReplyTo('riseandshinechess@gmail.com', 'Rise & Shine Chess Club');
+        $mail->addReplyTo('info@riseandshinechess.co.za', 'Rise & Shine Chess Club');
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
