@@ -78,4 +78,3 @@ class HoneypotProtection {
         return true;
     }
 }
-?>
