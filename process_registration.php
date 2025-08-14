@@ -73,12 +73,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             //Server settings
             $mail->isSMTP();
-            $mail->Host       = 'cp62.domains.co.za'; // Updated Host
+            $mail->Host       = 'sandbox.smtp.mailtrap.io';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'info@riseandshinechess.co.za';
-            $mail->Password   = 'Rise&Shine02';      // Updated Password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = 465;
+            $mail->Username   = '06d977bf35aa13';
+            $mail->Password   = 'ef556c79ff96ea';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
             // --- Admin Notification Email ---
             $mail->setFrom('info@riseandshinechess.co.za', 'Rise and Shine Chess Club');

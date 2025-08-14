@@ -55,12 +55,12 @@ function get_templates($filePath) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = trim($_POST['subject']);
     $body = trim($_POST['body']);
-    
+
     if (empty($subject) || empty($body)) {
         $error = "Subject and message body cannot be empty.";
     } else {
         $approved_members = get_approved_members($registrations_file);
-        
+
         if (empty($approved_members)) {
             $error = "There are no approved members to send notifications to.";
         } else {
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $mail->setFrom('no-reply@riseandshinechessclub.com', 'Rise & Shine Chess Club');
                 $mail->addReplyTo('riseandshinechess@gmail.com', 'Rise & Shine Chess Club');
-                
+
                 foreach ($approved_members as $member) {
                     $mail->addBCC($member['Email'], $member['Full Name']);
                 }
@@ -193,7 +193,7 @@ $email_templates = get_templates($templates_file);
                 <button class="mobile-menu-button" id="mobile-menu-btn">&#9776;</button>
                 <h1>Send Member Notifications</h1>
             </header>
-            
+
             <section class="content">
                 <div class="card">
                     <h2>Compose Email</h2>
