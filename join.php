@@ -55,12 +55,12 @@ $csrfToken = $_SESSION['csrf_token'];
             .menu-toggle {
                 display: block;
             }
-            
+
             header {
                 justify-content: space-between;
             }
         }
-        
+
         /* Join Page Specific Styles */
         .payment-info {
             background: #fff;
@@ -157,7 +157,7 @@ $csrfToken = $_SESSION['csrf_token'];
             </ul>
             <p>Amount: <strong>R100</strong> (Under 10), <strong>R150</strong> (10–16), or <strong>R200</strong> (17+).</p>
         </div>
-        
+
         <h3>Registration Form</h3>
         <form class="styled-form" id="joinForm" action="process_registration.php" method="POST" enctype="multipart/form-data" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
@@ -166,23 +166,23 @@ $csrfToken = $_SESSION['csrf_token'];
                 <label for="fullName">Full Name</label>
                 <input type="text" id="fullName" name="fullName" required placeholder="E.g., John Doe" value="<?= htmlspecialchars($oldData['fullName'] ?? '') ?>">
             </div>
-            
+
             <div class="form-group">
                 <label for="age">Age</label>
                 <input type="number" id="age" name="age" min="5" max="99" required placeholder="Enter your current age" value="<?= htmlspecialchars($oldData['age'] ?? '') ?>">
                 <p id="feeMessage" style="color: var(--secondary-color); font-weight: 600; margin-top: 8px; min-height: 1.2em;"></p>
             </div>
-            
+
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" required placeholder="E.g., your.email@example.com" value="<?= htmlspecialchars($oldData['email'] ?? '') ?>">
             </div>
-            
+
             <div class="form-group">
                 <label for="phone">Phone Number</label>
                 <input type="tel" id="phone" name="phone" placeholder="Optional" value="<?= htmlspecialchars($oldData['phone'] ?? '') ?>">
             </div>
-            
+
             <div class="form-group">
                 <label for="experience">Chess Experience</label>
                 <select id="experience" name="experience" required>
@@ -192,22 +192,22 @@ $csrfToken = $_SESSION['csrf_token'];
                     <option value="advanced" <?= (($oldData['experience'] ?? '') === 'advanced') ? 'selected' : '' ?>>Advanced (Play in tournaments)</option>
                 </select>
             </div>
-            
+
             <div class="form-group checkbox-label">
                 <input type="checkbox" id="joiningFee" name="joiningFee" required <?= isset($oldData['joiningFee']) ? 'checked' : '' ?>>
                 <label for="joiningFee">I understand I must pay the joining fee for my application to be approved.</label>
             </div>
-            
+
             <div class="form-group">
                 <label for="proof">Upload Proof of Payment (PDF, PNG, JPG)</label>
                 <input type="file" id="proof" name="proof" accept=".jpg,.jpeg,.png,.pdf" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="digitalSignature">Digital Signature (Type Your Full Name)</label>
                 <input type="text" id="digitalSignature" name="digitalSignature" required placeholder="Type your full name again to sign" value="<?= htmlspecialchars($oldData['digitalSignature'] ?? '') ?>">
             </div>
-            
+
             <button type="submit" class="btn">Submit Registration</button>
         </form>
     </section>

@@ -1,0 +1,17 @@
+
+# Robots.txt for Rise and Shine Chess Club
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /PHPMailer/
+Disallow: /attached_assets/
+Disallow: /*.log$
+Disallow: /sftp.json
+Disallow: /generate_hash.php
+Disallow: /test_email.php
+
+# Sitemap
+Sitemap: https://riseandshinechess.co.za/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

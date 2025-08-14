@@ -7,6 +7,8 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - Rise and Shine Chess Club</title>
+    <meta name="description" content="Contact the Rise and Shine Chess Club for inquiries about membership, events, coaching, or general information. We are based in Pretoria, South Africa.">
+    <meta name="keywords" content="chess club, Pretoria, South Africa, chess events, chess coaching, chess membership, contact chess club, Rise and Shine Chess Club">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -91,23 +93,27 @@ session_start();
                     }
                     ?>
                     <form action="process_contact.php" method="post" class="styled-form" style="margin: 0; padding:0;">
+                        <?php 
+                        require_once 'honeypot.php';
+                        echo HoneypotProtection::generateFields();
+                        ?>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name">Full Name</label>
-                                <input type="text" id="name" name="name" required>
+                                <input type="text" id="name" name="name" required maxlength="100" minlength="2">
                             </div>
                             <div class="form-group">
                                 <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" required>
+                                <input type="email" id="email" name="email" required maxlength="255">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="subject">Subject</label>
-                            <input type="text" id="subject" name="subject" value="<?php echo isset($_GET['subject']) ? htmlspecialchars($_GET['subject']) : ''; ?>" required>
+                            <input type="text" id="subject" name="subject" value="<?php echo isset($_GET['subject']) ? htmlspecialchars($_GET['subject']) : ''; ?>" required maxlength="200" minlength="5">
                         </div>
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="6" required></textarea>
+                            <textarea id="message" name="message" rows="6" required maxlength="2000" minlength="10"></textarea>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn">Send Message</button>

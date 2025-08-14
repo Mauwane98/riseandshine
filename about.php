@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Rise and Shine Chess Club</title>
+    <title>About Rise and Shine Chess Club - Premier Chess Development in Pretoria</title>
+    <meta name="description" content="Learn about Rise and Shine Chess Club's mission to develop chess talent in Nellmaphius, Pretoria. Established 2024, registered with Tshwane Chess.">
+    <meta name="keywords" content="chess club history Pretoria, chess development Nellmaphius, Tshwane chess registration, chess club mission, chess education Pretoria, learn about chess club">
+    <link rel="canonical" href="https://riseandshinechess.co.za/about.php">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>

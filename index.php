@@ -58,8 +58,60 @@ $galleryImages = getGalleryImages();
     <title>Rise and Shine Chess Club - Nellmaphius, Pretoria</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <meta name="description" content="Welcome to the Rise and Shine Chess Club in Nellmaphius, Pretoria. A development chess club registered with Tshwane Chess.">
-    <meta name="keywords" content="chess club, Pretoria chess, Nellmaphius chess, chess tournaments, learn chess, development chess">
+    <meta name="description" content="Rise and Shine Chess Club in Nellmaphius, Pretoria - South Africa's premier development chess club. Learn chess strategy, join tournaments, improve your rating, and master chess openings with expert coaching.">
+    <meta name="keywords" content="chess club Pretoria, Nellmaphius chess, chess lessons Pretoria, chess tournaments South Africa, learn chess strategy, chess coaching, chess openings, chess tactics, chess endgame, chess rating, Tshwane chess club, beginner chess lessons, advanced chess training, chess development, chess club membership, chess players Pretoria, chess competitions, chess grandmaster training, chess improvement, chess education">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://riseandshinechess.co.za/">
+    <meta property="og:title" content="Rise and Shine Chess Club - Nellmaphius, Pretoria">
+    <meta property="og:description" content="Join Pretoria's premier development chess club. Expert coaching, tournaments, and a welcoming community for all skill levels.">
+    <meta property="og:image" content="https://riseandshinechess.co.za/logo.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://riseandshinechess.co.za/">
+    <meta property="twitter:title" content="Rise and Shine Chess Club - Nellmaphius, Pretoria">
+    <meta property="twitter:description" content="Join Pretoria's premier development chess club. Expert coaching, tournaments, and a welcoming community for all skill levels.">
+    <meta property="twitter:image" content="https://riseandshinechess.co.za/logo.png">
+    
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Rise and Shine Chess Club">
+    <meta name="geo.region" content="ZA-GP">
+    <meta name="geo.placename" content="Nellmaphius, Pretoria">
+    <meta name="geo.position" content="-25.7479;28.2293">
+    <meta name="ICBM" content="-25.7479, 28.2293">
+    <link rel="canonical" href="https://riseandshinechess.co.za/">
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsClub",
+      "name": "Rise and Shine Chess Club",
+      "description": "Development chess club in Nellmaphius, Pretoria offering coaching, tournaments and community for all skill levels",
+      "url": "https://riseandshinechess.co.za",
+      "logo": "https://riseandshinechess.co.za/logo.png",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Nellmaphius",
+        "addressRegion": "Gauteng",
+        "addressCountry": "ZA"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+27715399671",
+        "contactType": "customer service",
+        "email": "info@riseandshinechess.co.za"
+      },
+      "sport": "Chess",
+      "memberOf": {
+        "@type": "Organization",
+        "name": "Tshwane Chess"
+      }
+    }
+    </script>
     <style>
         /* Styles for mobile navigation toggle */
         .menu-toggle {
