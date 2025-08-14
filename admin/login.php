@@ -28,11 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($users[$username]) && password_verify($password, $users[$username]['password_hash'])) {
         $_SESSION['username'] = $username;
-        log_activity($username . " logged in.");
+        $_SESSION['admin_logged_in_user'] = $username;
+        log_action("Login", $username . " logged in.");
         header('Location: index.php');
         exit;
     } else {
-        log_activity("Failed login attempt for username: " . $username);
+        log_action("Failed Login", "Failed login attempt for username: " . $username);
         $error_message = 'Invalid username or password.';
     }
 }
