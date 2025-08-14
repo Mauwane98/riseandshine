@@ -1,10 +1,11 @@
 <?php
 session_start();
-require_once 'helpers/auth.php';
+require_once __DIR__ . '/helpers/auth.php';
 require_login();
-require_once 'helpers/log_activity.php';
+check_permission(['Admin']);
+require_once __DIR__ . '/helpers/log_activity.php';
 
-$gallery_file = 'data/gallery.csv';
+$gallery_file = __DIR__ . '/data/gallery.csv';
 $upload_dir = '../gallery_uploads/';
 
 function getGalleryImages() {
@@ -22,32 +23,51 @@ function getGalleryImages() {
     return $images;
 }
 
-// Handle image upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['gallery_image'])) {
+// Handle multiple image uploads
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['gallery_images'])) {
     $caption = $_POST['caption'] ?? 'Untitled';
-    $filename = uniqid() . '-' . basename($_FILES['gallery_image']['name']);
+    $uploaded_count = 0;
+    $error_count = 0;
+    
+    $images = getGalleryImages();
+    $total_files = count($_FILES['gallery_images']['name']);
 
-    if (move_uploaded_file($_FILES['gallery_image']['tmp_name'], $upload_dir . $filename)) {
-        $images = getGalleryImages();
-        $id = uniqid();
-        $images[$id] = ['id' => $id, 'filename' => $filename, 'caption' => $caption];
-        
+    for ($i = 0; $i < $total_files; $i++) {
+        if ($_FILES['gallery_images']['error'][$i] === UPLOAD_ERR_OK) {
+            $filename = uniqid() . '-' . basename($_FILES['gallery_images']['name'][$i]);
+            
+            if (move_uploaded_file($_FILES['gallery_images']['tmp_name'][$i], $upload_dir . $filename)) {
+                $id = uniqid();
+                $images[$id] = ['id' => $id, 'filename' => $filename, 'caption' => $caption];
+                log_action('Image Upload', "Uploaded image: {$filename}");
+                $uploaded_count++;
+            } else {
+                $error_count++;
+            }
+        } elseif ($_FILES['gallery_images']['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+            $error_count++;
+        }
+    }
+    
+    if ($uploaded_count > 0) {
         $handle = fopen($gallery_file, 'w');
         fputcsv($handle, ['id', 'filename', 'caption']);
         foreach ($images as $image) {
             fputcsv($handle, $image);
         }
         fclose($handle);
-
-        log_activity($_SESSION['username'] . " uploaded image: " . $filename);
-        $_SESSION['message'] = 'Image uploaded successfully!';
-    } else {
-        $_SESSION['error'] = 1;
-        $_SESSION['message'] = 'Error uploading image.';
+        $_SESSION['message'] = "$uploaded_count image(s) uploaded successfully!";
     }
+
+    if ($error_count > 0) {
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = ($_SESSION['message'] ?? '') . " $error_count image(s) failed to upload.";
+    }
+
     header('Location: gallery.php');
     exit;
 }
+
 
 // Handle deletion
 if (isset($_GET['delete'])) {
@@ -55,9 +75,12 @@ if (isset($_GET['delete'])) {
     $images = getGalleryImages();
     if (isset($images[$id_to_delete])) {
         $image_to_delete = $images[$id_to_delete];
-        if (file_exists($upload_dir . $image_to_delete['filename'])) {
-            unlink($upload_dir . $image_to_delete['filename']);
+        
+        $file_path = $upload_dir . $image_to_delete['filename'];
+        if (!empty($image_to_delete['filename']) && file_exists($file_path) && is_file($file_path)) {
+            unlink($file_path);
         }
+        
         unset($images[$id_to_delete]);
 
         $handle = fopen($gallery_file, 'w');
@@ -67,7 +90,7 @@ if (isset($_GET['delete'])) {
         }
         fclose($handle);
 
-        log_activity($_SESSION['username'] . " deleted image: " . $image_to_delete['filename']);
+        log_action('Image Delete', "Deleted image: {$image_to_delete['filename']}");
         $_SESSION['message'] = 'Image deleted successfully!';
     }
     header('Location: gallery.php');
@@ -87,7 +110,7 @@ $allImages = array_reverse(getGalleryImages());
 </head>
 <body>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <h3>Admin Panel</h3>
             <nav>
                 <ul>
@@ -96,6 +119,7 @@ $allImages = array_reverse(getGalleryImages());
                     <li><a href="events.php"><i class="fas fa-calendar-alt"></i> Events</a></li>
                     <li class="active"><a href="gallery.php"><i class="fas fa-images"></i> Gallery</a></li>
                     <li><a href="messages.php"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="bulk_email.php"><i class="fas fa-paper-plane"></i> Bulk Email</a></li>
                     <li><a href="users.php"><i class="fas fa-user-shield"></i> Admin Users</a></li>
                     <li><a href="../index.php" target="_blank"><i class="fas fa-globe"></i> View Public Site</a></li>
                 </ul>
@@ -103,9 +127,12 @@ $allImages = array_reverse(getGalleryImages());
         </aside>
         <main class="admin-content">
             <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h2>Manage Gallery</h2>
                 <div class="admin-user">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['admin_logged_in_user'] ?? 'Admin'); ?></span>
                     <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
             </header>
@@ -115,18 +142,18 @@ $allImages = array_reverse(getGalleryImages());
             <?php endif; ?>
 
             <section class="admin-form-container">
-                <h3>Upload New Image</h3>
+                <h3>Upload New Images</h3>
                 <form action="gallery.php" method="post" enctype="multipart/form-data" class="styled-form">
                     <div class="form-group">
-                        <label for="gallery_image">Image File</label>
-                        <input type="file" id="gallery_image" name="gallery_image" accept="image/*" required>
+                        <label for="gallery_images">Image File(s)</label>
+                        <input type="file" id="gallery_images" name="gallery_images[]" accept="image/*" required multiple>
                     </div>
                     <div class="form-group">
-                        <label for="caption">Caption</label>
+                        <label for="caption">Caption (for all images in this batch)</label>
                         <input type="text" id="caption" name="caption" placeholder="e.g., Club Tournament Finals" required>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn">Upload Image</button>
+                        <button type="submit" class="btn">Upload Images</button>
                     </div>
                 </form>
             </section>
@@ -139,9 +166,9 @@ $allImages = array_reverse(getGalleryImages());
                     <?php else: ?>
                         <?php foreach ($allImages as $image): ?>
                         <div class="gallery-admin-item">
-                            <img src="<?php echo $upload_dir . $image['filename']; ?>" alt="<?php echo $image['caption']; ?>">
+                            <img src="<?php echo $upload_dir . $image['filename']; ?>" alt="<?php echo htmlspecialchars($image['caption']); ?>">
                             <div class="gallery-admin-info">
-                                <p><?php echo $image['caption']; ?></p>
+                                <p><?php echo htmlspecialchars($image['caption']); ?></p>
                                 <a href="?delete=<?php echo $image['id']; ?>" onclick="return confirm('Are you sure you want to delete this image?');" class="action-delete" title="Delete"><i class="fas fa-trash"></i> Delete</a>
                             </div>
                         </div>
@@ -151,5 +178,17 @@ $allImages = array_reverse(getGalleryImages());
             </section>
         </main>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,12 +1,10 @@
 <?php
 session_start();
-require_once 'helpers/auth.php';
+require_once __DIR__ . '/helpers/auth.php';
 require_login();
-// Optionally, add a role check here to ensure only a 'superadmin' can access this page
-// require_role('superadmin'); 
-require_once 'helpers/log_activity.php';
+require_once __DIR__ . '/helpers/log_activity.php';
 
-$users_file = 'data/users.csv';
+$users_file = __DIR__ . '/data/users.csv';
 
 function getUsers() {
     global $users_file;
@@ -46,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_username'])) {
             }
             fclose($handle);
 
-            log_activity($_SESSION['username'] . " created new admin user: " . $new_username);
+            log_action('Admin User Create', "Created new admin user: " . $new_username);
             $_SESSION['message'] = 'Admin user created successfully!';
         }
     } else {
@@ -60,8 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_username'])) {
 // Handle deletion
 if (isset($_GET['delete'])) {
     $user_to_delete = $_GET['delete'];
-    // Prevent deleting the currently logged-in user
-    if ($user_to_delete === $_SESSION['username']) {
+    if ($user_to_delete === ($_SESSION['admin_logged_in_user'] ?? '')) {
         $_SESSION['error'] = 1;
         $_SESSION['message'] = 'You cannot delete your own account.';
     } else {
@@ -76,7 +73,7 @@ if (isset($_GET['delete'])) {
             }
             fclose($handle);
 
-            log_activity($_SESSION['username'] . " deleted admin user: " . $user_to_delete);
+            log_action('Admin User Delete', "Deleted admin user: " . $user_to_delete);
             $_SESSION['message'] = 'Admin user deleted successfully!';
         }
     }
@@ -97,7 +94,7 @@ $allUsers = getUsers();
 </head>
 <body>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <h3>Admin Panel</h3>
             <nav>
                 <ul>
@@ -113,9 +110,12 @@ $allUsers = getUsers();
         </aside>
         <main class="admin-content">
             <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h2>Manage Admin Users</h2>
                 <div class="admin-user">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['admin_logged_in_user'] ?? 'Admin'); ?></span>
                     <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
             </header>
@@ -156,10 +156,10 @@ $allUsers = getUsers();
                         <?php else: ?>
                             <?php foreach ($allUsers as $user): ?>
                             <tr>
-                                <td><?php echo $user['username']; ?></td>
+                                <td><?php echo htmlspecialchars($user['username']); ?></td>
                                 <td class="action-links">
-                                    <?php if ($user['username'] !== $_SESSION['username']): ?>
-                                    <a href="?delete=<?php echo $user['username']; ?>" onclick="return confirm('Are you sure you want to delete this user? This cannot be undone.');" class="action-delete" title="Delete"><i class="fas fa-trash"></i></a>
+                                    <?php if ($user['username'] !== ($_SESSION['admin_logged_in_user'] ?? '')): ?>
+                                    <a href="?delete=<?php echo urlencode($user['username']); ?>" onclick="return confirm('Are you sure you want to delete this user? This cannot be undone.');" class="action-delete" title="Delete"><i class="fas fa-trash"></i></a>
                                     <?php else: ?>
                                     (Your Account)
                                     <?php endif; ?>
@@ -172,5 +172,17 @@ $allUsers = getUsers();
             </section>
         </main>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>
 </body>
 </html>

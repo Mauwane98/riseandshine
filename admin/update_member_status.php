@@ -1,89 +1,107 @@
 <?php
-// admin/update_member_status.php
-
 session_start();
 require_once __DIR__ . '/helpers/auth.php';
-check_permission(['Admin', 'Moderator']);
 require_once __DIR__ . '/helpers/log_activity.php';
-require_once __DIR__ . '/helpers/email.php'; // Include the email helper
 
-// --- Get parameters from URL ---
-$email_to_update = $_GET['email'] ?? null;
-$new_status = $_GET['status'] ?? null;
+// Use PHPMailer for email notifications
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-// --- Validate parameters ---
-if (!$email_to_update || !in_array($new_status, ['approved', 'declined', 'suspended'])) {
-    header('Location: members.php?error=invalidparams');
-    exit;
-}
+require '../PHPMailer/src/Exception.php';
+require '../PHPMailer/src/PHPMailer.php';
+require '../PHPMailer/src/SMTP.php';
+
+// Require login and Admin role to access this script
+require_login();
+check_permission(['Admin']);
 
 $registrations_file = __DIR__ . '/data/registrations.csv';
 
-// --- Read the entire CSV file into an array ---
-$all_data = [];
-if (($handle = fopen($registrations_file, 'r')) !== false) {
-    $header = fgetcsv($handle);
-    if ($header !== false) {
-        $all_data[] = $header;
-        while (($row = fgetcsv($handle)) !== false) {
-            if (is_array($row) && count($row) === count($header)) {
-                $all_data[] = $row;
-            }
-        }
+if (isset($_GET['id']) && isset($_GET['status'])) {
+    $id_to_update = $_GET['id'];
+    $new_status = $_GET['status'];
+
+    if (!in_array($new_status, ['approved', 'declined'])) {
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = 'Invalid status provided.';
+        header('Location: members.php');
+        exit;
     }
-    fclose($handle);
-} else {
-    header('Location: members.php?error=fileread');
-    exit;
-}
 
-// --- Find the member and update their status ---
-$header = $all_data[0];
-$email_column_index = array_search('Email', $header);
-$status_column_index = array_search('Status', $header);
-$updated = false;
-$member_to_notify = null;
+    $all_members = [];
+    $member_to_update = null;
+    $header = [];
 
-if ($email_column_index !== false && $status_column_index !== false) {
-    for ($i = 1; $i < count($all_data); $i++) {
-        if (isset($all_data[$i][$email_column_index]) && $all_data[$i][$email_column_index] === $email_to_update) {
-            $all_data[$i][$status_column_index] = ucfirst($new_status);
-            $member_to_notify = array_combine($header, $all_data[$i]); // Get member details for email
-            $updated = true;
+    // Read all data into memory
+    if (($handle = fopen($registrations_file, "r")) !== FALSE) {
+        $header = fgetcsv($handle); // Store header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            $all_members[] = $data;
+        }
+        fclose($handle);
+    }
+
+    // Find and update the specific member's status
+    foreach ($all_members as &$member_row) {
+        // CSV: id, name, email, phone, age, experience, proof, status, date
+        if (isset($member_row[0]) && $member_row[0] == $id_to_update) {
+            $member_row[7] = $new_status; // Update status column
+            $member_to_update = [
+                'name' => $member_row[1],
+                'email' => $member_row[2]
+            ];
             break;
         }
     }
-}
 
-// --- Write the updated data back to the CSV file ---
-if ($updated) {
-    if (($handle = fopen($registrations_file, 'w')) !== false) {
-        foreach ($all_data as $row) {
-            fputcsv($handle, $row);
-        }
-        fclose($handle);
-
-        log_action('Member Status Changed', "Set status to '" . ucfirst($new_status) . "' for member: " . $member_to_notify['Full Name']);
-
-        // --- Send Automated Email ---
-        $template_id = '';
-        if ($new_status === 'approved') {
-            $template_id = 'template_welcome';
-        } elseif ($new_status === 'declined') {
-            $template_id = 'template_rejection';
-        } elseif ($new_status === 'suspended') {
-            $template_id = 'template_suspension';
+    // Write the updated data back to the file
+    if ($member_to_update) {
+        if (($handle = fopen($registrations_file, "w")) !== FALSE) {
+            fputcsv($handle, $header); // Write header back
+            foreach ($all_members as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
         }
 
-        if ($template_id) {
-            send_template_email($template_id, $member_to_notify);
+        log_action('Member Status Change', "Status for {$member_to_update['name']} set to {$new_status}");
+        $_SESSION['message'] = "Membership status for " . htmlspecialchars($member_to_update['name']) . " has been updated.";
+
+        // --- Send Email Notification ---
+        $mail = new PHPMailer(true);
+        try {
+            //Server settings
+            $mail->isSMTP();
+            $mail->Host       = 'cp62.domains.co.za';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'info@riseandshinechess.co.za';
+            $mail->Password   = 'Rise&Shine02';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+
+            $mail->setFrom('info@riseandshinechess.co.za', 'Rise and Shine Chess Club');
+            $mail->addAddress($member_to_update['email'], $member_to_update['name']);
+            $mail->isHTML(true);
+
+            if ($new_status == 'approved') {
+                $mail->Subject = 'Your Membership Application has been Approved!';
+                $mail->Body    = "Dear {$member_to_update['name']},<br><br>Congratulations! Your application for membership at the Rise and Shine Chess Club has been approved. We are thrilled to welcome you to our community.<br><br>We look forward to seeing you at our next club night!<br><br>Sincerely,<br>The Rise and Shine Chess Club Team";
+            } else { // Declined
+                $mail->Subject = 'Update on Your Membership Application';
+                $mail->Body    = "Dear {$member_to_update['name']},<br><br>Thank you for your interest in the Rise and Shine Chess Club. After reviewing your application, we are unable to approve it at this time. <br><br>If you believe this is a mistake or have any questions, please feel free to contact us.<br><br>Sincerely,<br>The Rise and Shine Chess Club Team";
+            }
+            $mail->send();
+        } catch (Exception $e) {
+            // Don't block the admin, but add a note that email failed
+            $_SESSION['message'] .= " (Email notification could not be sent.)";
         }
 
     } else {
-        header('Location: members.php?error=filewrite');
-        exit;
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = 'Member ID not found.';
     }
 }
 
 header('Location: members.php');
 exit;
+?>

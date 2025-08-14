@@ -1,10 +1,12 @@
 <?php
 session_start();
-require_once 'helpers/auth.php';
+require_once __DIR__ . '/helpers/auth.php';
 require_login();
-require_once 'helpers/log_activity.php';
+check_permission(['Admin']);
+require_once __DIR__ . '/helpers/log_activity.php';
 
-$events_file = 'data/events.csv';
+$events_file = __DIR__ . '/data/events.csv';
+$registrations_file = __DIR__ . '/data/event_registrations.csv';
 $upload_dir = '../event_uploads/';
 
 // Function to get all events
@@ -23,17 +25,33 @@ function getEvents() {
     return $events;
 }
 
+// --- NEW FEATURE: Function to count registrations for an event ---
+function getRegistrationCount($eventId) {
+    global $registrations_file;
+    $count = 0;
+    if (file_exists($registrations_file) && ($handle = fopen($registrations_file, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            // CSV: reg_id, event_id, ...
+            if (isset($data[1]) && $data[1] == $eventId) {
+                $count++;
+            }
+        }
+        fclose($handle);
+    }
+    return $count;
+}
+
+
 // Handle form submission for adding/editing events
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_name'])) {
     $events = getEvents();
     $id = $_POST['event_id'] ?? uniqid();
     $poster_filename = $_POST['existing_poster'] ?? '';
 
-    // Handle file upload
     if (isset($_FILES['poster']) && $_FILES['poster']['error'] == 0) {
         $filename = uniqid() . '-' . basename($_FILES['poster']['name']);
         if (move_uploaded_file($_FILES['poster']['tmp_name'], $upload_dir . $filename)) {
-            // If editing, delete old poster
             if (!empty($poster_filename) && file_exists($upload_dir . $poster_filename)) {
                 unlink($upload_dir . $poster_filename);
             }
@@ -50,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_name'])) {
         'poster' => $poster_filename
     ];
 
-    // Save back to CSV
     $handle = fopen($events_file, 'w');
     fputcsv($handle, ['id', 'event_name', 'event_date', 'location', 'description', 'poster']);
     foreach ($events as $event) {
@@ -58,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_name'])) {
     }
     fclose($handle);
 
-    log_activity($_SESSION['username'] . (isset($_POST['event_id']) ? ' updated' : ' created') . " event: " . $_POST['event_name']);
+    $action_type = isset($_POST['event_id']) ? 'Event Update' : 'Event Create';
+    log_action($action_type, "Event: {$_POST['event_name']}");
     $_SESSION['message'] = 'Event saved successfully!';
     header('Location: events.php');
     exit;
@@ -70,7 +88,6 @@ if (isset($_GET['delete'])) {
     $events = getEvents();
     if (isset($events[$id_to_delete])) {
         $deleted_event_name = $events[$id_to_delete]['name'];
-        // Delete poster image
         if (!empty($events[$id_to_delete]['poster']) && file_exists($upload_dir . $events[$id_to_delete]['poster'])) {
             unlink($upload_dir . $events[$id_to_delete]['poster']);
         }
@@ -83,7 +100,7 @@ if (isset($_GET['delete'])) {
         }
         fclose($handle);
 
-        log_activity($_SESSION['username'] . " deleted event: " . $deleted_event_name);
+        log_action('Event Delete', "Deleted event: {$deleted_event_name}");
         $_SESSION['message'] = 'Event deleted successfully!';
     }
     header('Location: events.php');
@@ -105,7 +122,7 @@ $show_form = isset($_GET['action']) && $_GET['action'] == 'add' || $edit_event;
 </head>
 <body>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <h3>Admin Panel</h3>
             <nav>
                 <ul>
@@ -114,6 +131,7 @@ $show_form = isset($_GET['action']) && $_GET['action'] == 'add' || $edit_event;
                     <li class="active"><a href="events.php"><i class="fas fa-calendar-alt"></i> Events</a></li>
                     <li><a href="gallery.php"><i class="fas fa-images"></i> Gallery</a></li>
                     <li><a href="messages.php"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="bulk_email.php"><i class="fas fa-paper-plane"></i> Bulk Email</a></li>
                     <li><a href="users.php"><i class="fas fa-user-shield"></i> Admin Users</a></li>
                     <li><a href="../index.php" target="_blank"><i class="fas fa-globe"></i> View Public Site</a></li>
                 </ul>
@@ -121,9 +139,12 @@ $show_form = isset($_GET['action']) && $_GET['action'] == 'add' || $edit_event;
         </aside>
         <main class="admin-content">
             <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h2>Manage Events</h2>
                 <div class="admin-user">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['admin_logged_in_user'] ?? 'Admin'); ?></span>
                     <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
             </header>
@@ -177,37 +198,54 @@ $show_form = isset($_GET['action']) && $_GET['action'] == 'add' || $edit_event;
 
             <section class="admin-table-container">
                 <h3>Existing Events</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Poster</th>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Location</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($allEvents)): ?>
-                            <tr><td colspan="5">No events found.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($allEvents as $event): ?>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
                             <tr>
-                                <td><img src="<?php echo $upload_dir . $event['poster']; ?>" alt="Poster" class="table-thumb" onerror="this.style.display='none'"></td>
-                                <td><?php echo $event['name']; ?></td>
-                                <td><?php echo date('Y-m-d', strtotime($event['date'])); ?></td>
-                                <td><?php echo $event['location']; ?></td>
-                                <td class="action-links">
-                                    <a href="?edit=<?php echo $event['id']; ?>" class="action-edit" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <a href="?delete=<?php echo $event['id']; ?>" onclick="return confirm('Are you sure you want to delete this event?');" class="action-delete" title="Delete"><i class="fas fa-trash"></i></a>
-                                </td>
+                                <th>Poster</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Registrations</th>
+                                <th>Actions</th>
                             </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($allEvents)): ?>
+                                <tr><td colspan="5">No events found.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($allEvents as $event): ?>
+                                <tr>
+                                    <td><img src="<?php echo $upload_dir . $event['poster']; ?>" alt="Poster" class="table-thumb" onerror="this.style.display='none'"></td>
+                                    <td><?php echo htmlspecialchars($event['name']); ?></td>
+                                    <td><?php echo date('Y-m-d', strtotime($event['date'])); ?></td>
+                                    <td>
+                                        <?php $reg_count = getRegistrationCount($event['id']); ?>
+                                        <a href="view_registrations.php?event_id=<?php echo $event['id']; ?>" class="action-links" style="color: var(--accent-color);"><?php echo $reg_count; ?></a>
+                                    </td>
+                                    <td class="action-links">
+                                        <a href="?edit=<?php echo $event['id']; ?>" class="action-edit" title="Edit"><i class="fas fa-edit"></i></a>
+                                        <a href="?delete=<?php echo $event['id']; ?>" onclick="return confirm('Are you sure you want to delete this event?');" class="action-delete" title="Delete"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>
 </body>
 </html>

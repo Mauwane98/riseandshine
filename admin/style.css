@@ -10,7 +10,7 @@
     --accent-hover: #2980b9;
     --success-color: #2ecc71;
     --error-color: #e74c3c;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
 body {
@@ -28,29 +28,24 @@ body {
     height: 100vh;
     background-color: var(--sidebar-bg);
 }
-
 .login-container {
     width: 100%;
     max-width: 400px;
 }
-
 .login-box {
     background: var(--header-bg);
     padding: 2.5rem;
     border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     text-align: center;
 }
-
 .login-logo {
     max-width: 80px;
     margin-bottom: 1rem;
 }
-
 .login-box h2 {
     margin-bottom: 1.5rem;
 }
-
 .back-to-site {
     display: inline-block;
     margin-top: 1.5rem;
@@ -63,28 +58,25 @@ body {
     display: flex;
     min-height: 100vh;
 }
-
 .admin-sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
     color: var(--light-text);
     padding: 1.5rem;
     flex-shrink: 0;
+    transition: transform 0.3s ease-in-out;
 }
-
 .admin-sidebar h3 {
     text-align: center;
     color: var(--light-text);
     margin-bottom: 2rem;
     font-size: 1.5rem;
 }
-
 .admin-sidebar nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
-
 .admin-sidebar nav a {
     display: block;
     color: var(--light-text);
@@ -94,13 +86,11 @@ body {
     margin-bottom: 0.5rem;
     transition: background-color 0.3s ease;
 }
-
 .admin-sidebar nav a i {
     margin-right: 10px;
     width: 20px;
     text-align: center;
 }
-
 .admin-sidebar nav li.active a,
 .admin-sidebar nav a:hover {
     background-color: var(--accent-hover);
@@ -109,8 +99,8 @@ body {
 .admin-content {
     flex-grow: 1;
     padding: 2rem;
+    width: 100%;
 }
-
 .admin-header {
     background: var(--header-bg);
     padding: 1rem 2rem;
@@ -121,17 +111,14 @@ body {
     align-items: center;
     margin-bottom: 2rem;
 }
-
 .admin-header h2 {
     margin: 0;
 }
-
 .admin-user {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
-
 .logout-btn {
     background: var(--error-color);
     color: white;
@@ -141,6 +128,16 @@ body {
     font-weight: 500;
 }
 
+/* --- Mobile Sidebar Toggle --- */
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--primary-text);
+    cursor: pointer;
+}
+
 /* --- Dashboard --- */
 .dashboard-stats {
     display: grid;
@@ -148,7 +145,6 @@ body {
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
-
 .stat-card {
     background: var(--header-bg);
     padding: 1.5rem;
@@ -159,23 +155,19 @@ body {
     gap: 1.5rem;
     position: relative;
 }
-
 .stat-icon {
     font-size: 2.5rem;
     color: var(--accent-color);
 }
-
 .stat-info p {
     margin: 0;
     font-size: 1rem;
     color: var(--secondary-text);
 }
-
 .stat-info span {
     font-size: 2rem;
     font-weight: 600;
 }
-
 .stat-link {
     position: absolute;
     bottom: 10px;
@@ -185,22 +177,18 @@ body {
     text-decoration: none;
 }
 
-.quick-actions,
-.admin-form-container,
-.admin-table-container {
+.quick-actions, .admin-form-container, .admin-table-container {
     background: var(--header-bg);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
 }
-
 .action-buttons {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
 }
-
 .action-btn {
     background: var(--accent-color);
     color: white;
@@ -210,7 +198,6 @@ body {
     font-weight: 500;
     transition: background-color 0.3s;
 }
-
 .action-btn:hover {
     background: var(--accent-hover);
 }
@@ -219,17 +206,14 @@ body {
 .styled-form {
     max-width: 700px;
 }
-
 .form-group {
     margin-bottom: 1.5rem;
 }
-
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
 }
-
 .form-group input[type="text"],
 .form-group input[type="password"],
 .form-group input[type="date"],
@@ -242,7 +226,6 @@ body {
     font-size: 1rem;
     box-sizing: border-box;
 }
-
 .btn {
     background-color: var(--accent-color);
     color: white;
@@ -253,7 +236,6 @@ body {
     font-size: 1rem;
     font-weight: 600;
 }
-
 .btn-cancel {
     background-color: var(--secondary-text);
     margin-left: 1rem;
@@ -262,37 +244,35 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    overflow-x: auto;
+    display: block;
 }
-
-table th,
-table td {
+table th, table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    white-space: nowrap;
 }
-
 table th {
     font-weight: 600;
 }
-
 table tbody tr:hover {
     background-color: #f9f9f9;
 }
-
 .table-thumb {
     width: 80px;
     height: 50px;
     object-fit: cover;
     border-radius: 5px;
 }
-
 .table-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
-
 .filter-links a {
     margin-right: 1rem;
     text-decoration: none;
@@ -300,13 +280,11 @@ table tbody tr:hover {
     padding: 0.5rem 1rem;
     border-radius: 20px;
 }
-
 .filter-links a.active {
     background-color: var(--accent-color);
     color: white;
     font-weight: 600;
 }
-
 .btn-export {
     background: var(--success-color);
     color: white;
@@ -314,7 +292,6 @@ table tbody tr:hover {
     border-radius: 5px;
     text-decoration: none;
 }
-
 .status-badge {
     padding: 0.3rem 0.6rem;
     border-radius: 15px;
@@ -322,45 +299,24 @@ table tbody tr:hover {
     font-size: 0.8rem;
     font-weight: 600;
 }
-
-.status-pending {
-    background-color: #f39c12;
-}
-
-.status-approved {
-    background-color: var(--success-color);
-}
-
-.status-declined {
-    background-color: var(--error-color);
-}
+.status-pending { background-color: #f39c12; }
+.status-approved { background-color: var(--success-color); }
+.status-declined { background-color: var(--error-color); }
 
 .action-links a {
     margin: 0 5px;
     font-size: 1.2rem;
     text-decoration: none;
 }
-
-.action-approve,
-.action-edit {
-    color: var(--success-color);
-}
-
-.action-decline,
-.action-delete {
-    color: var(--error-color);
-}
-
-.action-reply {
-    color: var(--accent-color);
-}
+.action-approve, .action-edit { color: var(--success-color); }
+.action-decline, .action-delete { color: var(--error-color); }
+.action-reply { color: var(--accent-color); }
 
 /* --- Messages Page --- */
 .message-body-row td {
     background-color: #f9f9f9;
     padding: 0;
 }
-
 .message-body {
     padding: 1.5rem;
     border-left: 4px solid var(--accent-color);
@@ -372,24 +328,20 @@ table tbody tr:hover {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
 }
-
 .gallery-admin-item {
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
 }
-
 .gallery-admin-item img {
     width: 100%;
     height: 150px;
     object-fit: cover;
     display: block;
 }
-
 .gallery-admin-info {
     padding: 1rem;
 }
-
 .gallery-admin-info p {
     margin: 0 0 10px 0;
     font-weight: 500;
@@ -405,12 +357,10 @@ table tbody tr:hover {
     overflow-y: auto;
     font-family: 'Courier New', Courier, monospace;
 }
-
 .log-entry {
     padding: 0.5rem 0;
     border-bottom: 1px solid #34495e;
 }
-
 .log-entry:last-child {
     border-bottom: none;
 }
@@ -422,15 +372,43 @@ table tbody tr:hover {
     border-radius: 5px;
     border: 1px solid transparent;
 }
-
 .message.success {
     background-color: #d4edda;
     color: #155724;
     border-color: #c3e6cb;
 }
-
 .message.error {
     background-color: #f8d7da;
     color: #721c24;
     border-color: #f5c6cb;
+}
+
+/* --- Responsive Design for Admin --- */
+@media (max-width: 992px) {
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+    .admin-content {
+        padding: 1rem;
+    }
+    .admin-header {
+        padding: 1rem;
+        position: sticky; /* FIX: Makes header stay at the top */
+        top: 0;
+        z-index: 990; /* Ensures it's above content but below sidebar */
+    }
+    .sidebar-toggle {
+        display: block;
+    }
+    .admin-header h2 {
+        font-size: 1.2rem;
+    }
 }

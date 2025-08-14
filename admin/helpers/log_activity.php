@@ -9,31 +9,39 @@
  */
 function log_action(string $action, string $details = '') {
     $log_file = __DIR__ . '/../data/activity_log.csv';
+    
+    // Ensure the data directory exists
+    if (!is_dir(dirname($log_file))) {
+        mkdir(dirname($log_file), 0755, true);
+    }
+
     $timestamp = date('Y-m-d H:i:s');
 
-    // Get the username from the session if available
-    $username = $_SESSION['admin_logged_in_user'] ?? 'System';
+    // Get the username from the session if available (compatible with current login script)
+    $username = $_SESSION['username'] ?? $_SESSION['admin_logged_in_user'] ?? 'System';
 
     $log_entry = [$timestamp, $username, $action, $details];
+    $header_row = ['Timestamp', 'User', 'Action', 'Details'];
+    $file_exists = file_exists($log_file);
 
-    // Create the file with a header if it doesn't exist
-    if (!file_exists($log_file)) {
-        if (($handle = fopen($log_file, 'w')) !== false) {
-            fputcsv($handle, ['Timestamp', 'User', 'Action', 'Details']);
-            fclose($handle);
-        }
+    // Open the file in append mode
+    $handle = fopen($log_file, 'a');
+
+    if ($handle === false) {
+        // Error handling: could not open the file for writing.
+        // In a production environment, you might trigger an error or log this failure.
+        return;
+    }
+
+    // If the file is new or empty, add the header row
+    if (!$file_exists || filesize($log_file) === 0) {
+        fputcsv($handle, $header_row);
     }
 
     // Append the new log entry
-    if (($handle = fopen($log_file, 'a')) !== false) {
-        fputcsv($handle, $log_entry);
-        fclose($handle);
-    }
+    fputcsv($handle, $log_entry);
+    
+    // Close the file handle
+    fclose($handle);
 }
-
-// Also update the login script to store the username in the session
-// We can't edit that file now, but here's a note on what to change in login.php:
-// After successful login:
-// $_SESSION['admin_logged_in'] = true;
-// $_SESSION['admin_logged_in_user'] = $username; // <-- ADD THIS LINE
-// log_action('Login', "User '$username' logged in."); // <-- AND THIS ONE
+?>

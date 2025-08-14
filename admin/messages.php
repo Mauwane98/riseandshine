@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once 'helpers/auth.php';
+require_once __DIR__ . '/helpers/auth.php';
 require_login();
-require_once 'helpers/log_activity.php';
+require_once __DIR__ . '/helpers/log_activity.php';
 
-$messages_file = 'data/messages.csv';
+$messages_file = __DIR__ . '/data/messages.csv';
 
 function getMessages() {
     global $messages_file;
@@ -12,7 +12,7 @@ function getMessages() {
     if (file_exists($messages_file) && ($handle = fopen($messages_file, "r")) !== FALSE) {
         fgetcsv($handle); // Skip header
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            if(count($data) >= 5) {
+            if(count($data) >= 6) {
                  $messages[$data[0]] = ['id' => $data[0], 'name' => $data[1], 'email' => $data[2], 'subject' => $data[3], 'message' => $data[4], 'date' => $data[5]];
             }
         }
@@ -36,7 +36,7 @@ if (isset($_GET['delete'])) {
         }
         fclose($handle);
 
-        log_activity($_SESSION['username'] . " deleted message: " . $deleted_message_subject);
+        log_action('Message Delete', "Deleted message: " . $deleted_message_subject);
         $_SESSION['message'] = 'Message deleted successfully!';
     }
     header('Location: messages.php');
@@ -56,7 +56,7 @@ $allMessages = array_reverse(getMessages());
 </head>
 <body>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <h3>Admin Panel</h3>
             <nav>
                 <ul>
@@ -72,9 +72,12 @@ $allMessages = array_reverse(getMessages());
         </aside>
         <main class="admin-content">
             <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h2>Contact Messages</h2>
                 <div class="admin-user">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['admin_logged_in_user'] ?? 'Admin'); ?></span>
                     <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
             </header>
@@ -100,18 +103,18 @@ $allMessages = array_reverse(getMessages());
                         <?php else: ?>
                             <?php foreach ($allMessages as $msg): ?>
                             <tr>
-                                <td><strong><?php echo $msg['name']; ?></strong><br><small><?php echo $msg['email']; ?></small></td>
-                                <td><?php echo $msg['subject']; ?></td>
+                                <td><strong><?php echo htmlspecialchars($msg['name']); ?></strong><br><small><?php echo htmlspecialchars($msg['email']); ?></small></td>
+                                <td><?php echo htmlspecialchars($msg['subject']); ?></td>
                                 <td><?php echo date('Y-m-d H:i', strtotime($msg['date'])); ?></td>
                                 <td class="action-links">
-                                    <a href="mailto:<?php echo $msg['email']; ?>" class="action-reply" title="Reply"><i class="fas fa-reply"></i></a>
+                                    <a href="mailto:<?php echo htmlspecialchars($msg['email']); ?>" class="action-reply" title="Reply"><i class="fas fa-reply"></i></a>
                                     <a href="?delete=<?php echo $msg['id']; ?>" onclick="return confirm('Are you sure you want to delete this message?');" class="action-delete" title="Delete"><i class="fas fa-trash"></i></a>
                                 </td>
                             </tr>
                             <tr class="message-body-row">
                                 <td colspan="4">
                                     <div class="message-body">
-                                        <p><?php echo nl2br($msg['message']); ?></p>
+                                        <p><?php echo nl2br(htmlspecialchars($msg['message'])); ?></p>
                                     </div>
                                 </td>
                             </tr>
@@ -122,5 +125,17 @@ $allMessages = array_reverse(getMessages());
             </section>
         </main>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>
 </body>
 </html>

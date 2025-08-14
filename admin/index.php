@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'helpers/auth.php';
+require_once __DIR__ . '/helpers/auth.php';
 require_login();
 
 // --- Helper function to count rows in a CSV file ---
@@ -27,7 +27,6 @@ function countUpcomingEvents($filePath) {
     if (($handle = fopen($filePath, "r")) !== FALSE) {
         fgetcsv($handle); // Skip header
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            // Assuming date is in column 3 (index 2)
             if (isset($data[2]) && strtotime($data[2]) >= time()) {
                 $upcomingCount++;
             }
@@ -38,9 +37,9 @@ function countUpcomingEvents($filePath) {
 }
 
 // --- Get Statistics ---
-$pendingMembersCount = countCsvRows('data/registrations.csv');
-$upcomingEventsCount = countUpcomingEvents('data/events.csv');
-$newMessagesCount = countCsvRows('data/messages.csv');
+$pendingMembersCount = countCsvRows(__DIR__ . '/data/registrations.csv');
+$upcomingEventsCount = countUpcomingEvents(__DIR__ . '/data/events.csv');
+$newMessagesCount = countCsvRows(__DIR__ . '/data/messages.csv');
 
 ?>
 <!DOCTYPE html>
@@ -54,7 +53,7 @@ $newMessagesCount = countCsvRows('data/messages.csv');
 </head>
 <body>
     <div class="admin-container">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <h3>Admin Panel</h3>
             <nav>
                 <ul>
@@ -70,9 +69,12 @@ $newMessagesCount = countCsvRows('data/messages.csv');
         </aside>
         <main class="admin-content">
             <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h2>Dashboard</h2>
                 <div class="admin-user">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['admin_logged_in_user'] ?? 'Admin'); ?></span>
                     <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
             </header>
@@ -116,5 +118,17 @@ $newMessagesCount = countCsvRows('data/messages.csv');
             </section>
         </main>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        if (sidebar && toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>
 </body>
 </html>

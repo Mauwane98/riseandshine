@@ -9,41 +9,61 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
-// Function to get a specific event by its ID
+// --- Helper Functions ---
+
 function getEventById($id) {
     $filePath = 'admin/data/events.csv';
-    if (file_exists($filePath)) {
-        if (($handle = fopen($filePath, "r")) !== FALSE) {
-            fgetcsv($handle); // Skip header
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                if (isset($data[0]) && $data[0] == $id) {
-                    fclose($handle);
-                    return [
-                        'id' => htmlspecialchars($data[0]),
-                        'name' => htmlspecialchars($data[1]),
-                        'date' => htmlspecialchars($data[2]),
-                        'location' => htmlspecialchars($data[3]),
-                        'description' => htmlspecialchars($data[4]),
-                        'poster' => htmlspecialchars($data[5])
-                    ];
-                }
+    if (file_exists($filePath) && ($handle = fopen($filePath, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            if (isset($data[0]) && $data[0] == $id) {
+                fclose($handle);
+                return ['id' => htmlspecialchars($data[0]), 'name' => htmlspecialchars($data[1]), 'date' => htmlspecialchars($data[2]), 'location' => htmlspecialchars($data[3]), 'description' => htmlspecialchars($data[4]), 'poster' => htmlspecialchars($data[5])];
             }
-            fclose($handle);
         }
+        fclose($handle);
     }
     return null;
 }
 
+// --- NEW FEATURE: Function to check if a member is approved ---
+function isMemberApproved($email) {
+    $filePath = 'admin/data/registrations.csv';
+    if (file_exists($filePath) && ($handle = fopen($filePath, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            // CSV: id, name, email, ..., status, ...
+            if (isset($data[2]) && strtolower(trim($data[2])) == strtolower(trim($email))) {
+                if (isset($data[7]) && $data[7] == 'approved') {
+                    fclose($handle);
+                    return true; // Member found and is approved
+                }
+            }
+        }
+        fclose($handle);
+    }
+    return false; // Member not found or not approved
+}
+
+
 // --- Handle Form Submission ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $event_id = filter_input(INPUT_POST, 'event_id', FILTER_SANITIZE_STRING);
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+    $event_id = isset($_POST['event_id']) ? htmlspecialchars(trim($_POST['event_id'])) : '';
+    $name = isset($_POST['name']) ? htmlspecialchars(trim($_POST['name'])) : '';
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
 
     if (empty($event_id) || empty($name) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = 1;
         $_SESSION['message'] = "Please provide a valid name and email address.";
-        header("Location: event_register.php?event_id=" . $event_id);
+        header("Location: event_register.php?event_id=" . urlencode($event_id));
+        exit();
+    }
+    
+    // --- Membership Verification ---
+    if (!isMemberApproved($email)) {
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = "Registration Failed: Only approved members of the Rise and Shine Chess Club can register for tournaments. Please apply for a membership or wait for your application to be approved.";
+        header("Location: event_register.php?event_id=" . urlencode($event_id));
         exit();
     }
 
@@ -56,24 +76,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $file_path = 'admin/data/event_registrations.csv';
-    $file = fopen($file_path, 'a');
-
-    if ($file) {
-        $registration_data = [
-            uniqid(),
-            $event_id,
-            $event['name'],
-            $name,
-            $email,
-            date('Y-m-d H:i:s')
-        ];
+    if (($file = fopen($file_path, 'a')) !== FALSE) {
+        $registration_data = [ uniqid(), $event_id, $event['name'], $name, $email, date('Y-m-d H:i:s') ];
         fputcsv($file, $registration_data);
         fclose($file);
 
         // --- Email Notification Logic ---
         $mail = new PHPMailer(true);
         try {
-            //Server settings
             $mail->isSMTP();
             $mail->Host       = 'cp62.domains.co.za';
             $mail->SMTPAuth   = true;
@@ -82,34 +92,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port       = 465;
 
-            // Admin Notification
+            // Admin Notification & User Confirmation... (rest of the email code is the same)
             $mail->setFrom('info@riseandshinechess.co.za', 'Event Registration');
             $mail->addAddress('info@riseandshinechess.co.za', 'Admin');
             $mail->isHTML(true);
             $mail->Subject = 'New Event Registration: ' . $event['name'];
-            $mail->Body    = "A new registration has been submitted for the event: <b>{$event['name']}</b>.<br><br>" .
+            $mail->Body    = "An approved member has registered for the event: <b>{$event['name']}</b>.<br><br>" .
                              "<b>Registrant Name:</b> {$name}<br>" .
-                             "<b>Registrant Email:</b> {$email}<br><br>" .
-                             "You can view all registrations in the admin panel.";
+                             "<b>Registrant Email:</b> {$email}<br><br>";
             $mail->send();
 
-            // User Confirmation
             $mail->clearAddresses();
             $mail->addAddress($email, $name);
             $mail->Subject = 'Confirmation: You are registered for ' . $event['name'];
             $mail->Body    = "Dear {$name},<br><br>" .
                              "Thank you for registering for our event: <b>{$event['name']}</b>.<br><br>" .
-                             "<b>Event Date:</b> " . date('F j, Y', strtotime($event['date'])) . "<br>" .
-                             "<b>Location:</b> {$event['location']}<br><br>" .
                              "We look forward to seeing you there!<br><br>" .
                              "Sincerely,<br>" .
                              "The Rise and Shine Chess Club Team";
             $mail->send();
 
-        } catch (Exception $e) {
-            // Log error, but don't stop the user flow
-            // error_log("Mailer Error for event registration: {$mail->ErrorInfo}");
-        }
+        } catch (Exception $e) { /* Log error silently */ }
 
         $_SESSION['message'] = "You have been successfully registered for the event!";
         header("Location: success.php");
@@ -117,22 +120,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $_SESSION['error'] = 1;
         $_SESSION['message'] = "Error: Could not process your registration. Please try again.";
-        header("Location: event_register.php?event_id=" . $event_id);
+        header("Location: event_register.php?event_id=" . urlencode($event_id));
         exit();
     }
 }
 
 // --- Handle Page Load ---
-$event_id = filter_input(INPUT_GET, 'event_id', FILTER_SANITIZE_STRING);
-$event = null;
-if ($event_id) {
-    $event = getEventById($event_id);
-}
+$event_id = isset($_GET['event_id']) ? htmlspecialchars(trim($_GET['event_id'])) : null;
+$event = $event_id ? getEventById($event_id) : null;
 
 if (!$event) {
     $_SESSION['error'] = 1;
     $_SESSION['message'] = "The requested event could not be found.";
-    // To avoid a redirect loop if the ID is invalid, send to main events page
     if (!headers_sent()) {
         header("Location: events.php");
         exit();
@@ -157,13 +156,12 @@ if (!$event) {
         <nav>
             <ul>
                 <li><a href="index.php">Home</a></li>
-                <li><a href="about.html">About</a></li>
+                <li><a href="about.php">About</a></li>
                 <li class="active"><a href="events.php">Events</a></li>
                 <li><a href="membership.php">Membership</a></li>
                 <li><a href="coaching.php">Coaching</a></li>
                 <li><a href="gallery.php">Gallery</a></li>
                 <li><a href="contact.php">Contact</a></li>
-                <li><a href="admin/login.php">Admin</a></li>
             </ul>
         </nav>
     </header>
@@ -198,11 +196,11 @@ if (!$event) {
                     ?>
 
                     <div class="form-group">
-                        <label for="name">Full Name</label>
+                        <label for="name">Full Name (as per your membership)</label>
                         <input type="text" id="name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email Address</label>
+                        <label for="email">Membership Email Address</label>
                         <input type="email" id="email" name="email" required>
                     </div>
                     <div class="form-group">
@@ -226,9 +224,9 @@ if (!$event) {
             </div>
             <div class="footer-section">
                 <h3>Contact Info</h3>
-                <p><i class="fas fa-phone"></i> <a href="tel:+27123456789">+27 12 345 6789</a></p>
+                <p><i class="fas fa-phone"></i> <a href="tel:+27715399671">+27 71 539 9671</a></p>
                 <p><i class="fas fa-envelope"></i> <a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
-                <p><i class="fas fa-map-marker-alt"></i> 123 Chess Lane, Johannesburg, SA</p>
+                <p><i class="fas fa-map-marker-alt"></i> Nellmaphius, Pretoria, SA</p>
             </div>
             <div class="footer-section">
                 <h3>Follow Us</h3>
@@ -240,7 +238,7 @@ if (!$event) {
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Rise and Shine Chess Club. All Rights Reserved.</p>
+            <p>&copy; <?php echo date("Y"); ?> Rise and Shine Chess Club (Est. 2024). All Rights Reserved.</p>
         </div>
     </footer>
 </body>

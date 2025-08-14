@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once 'helpers/log_activity.php'; // This line was missing
-$users_file = 'data/users.csv';
+require_once __DIR__ . '/helpers/log_activity.php'; 
+
+$users_file = __DIR__ . '/data/users.csv';
 $error_message = '';
 
 // If user is already logged in, redirect to dashboard
@@ -20,21 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         fgetcsv($handle); // Skip header
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
             if(count($data) >= 2) {
-                $users[$data[0]] = ['username' => $data[0], 'password_hash' => $data[1]];
+                // CSV structure: username, password_hash, role (optional)
+                $users[$data[0]] = [
+                    'username' => $data[0], 
+                    'password_hash' => $data[1],
+                    'role' => $data[2] ?? 'Admin' // Default to 'Admin' if role column doesn't exist
+                ];
             }
         }
         fclose($handle);
     }
 
     if (isset($users[$username]) && password_verify($password, $users[$username]['password_hash'])) {
-        $_SESSION['username'] = $username;
+        // Set the new session variables to match the auth helper
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_logged_in_user'] = $username;
-        log_action("Login", $username . " logged in.");
+        $_SESSION['admin_user_role'] = $users[$username]['role']; // Set the user's role
+
+        log_action('Login', "User '$username' logged in.");
         header('Location: index.php');
         exit;
     } else {
-        log_action("Failed Login", "Failed login attempt for username: " . $username);
+        log_action('Login Failure', "Failed login attempt for username: " . $username);
         $error_message = 'Invalid username or password.';
     }
 }
