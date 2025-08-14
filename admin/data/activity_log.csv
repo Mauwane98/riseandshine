@@ -43,3 +43,4 @@ Timestamp,User,Action,Details
 "2025-08-11 12:36:04",System,"Login Failed","Failed login attempt for username: 'admin'."
 "2025-08-11 12:36:29",System,"Login Failed","Failed login attempt for username: 'admin'."
 "2025-08-11 20:31:06",System,"Login Failed","Failed login attempt for username: 'admin'."
+"2025-08-14 16:11:36",riseandshine,Login,"riseandshine logged in."
