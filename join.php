@@ -17,193 +17,243 @@ $csrfToken = $_SESSION['csrf_token'];
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Join Us | Rise and Shine Chess Club</title>
-  <meta name="description" content="Register to become a member of the Rise and Shine Chess Club. Fill out the form and join our passionate chess community in Nellmapius, Pretoria.">
-  <style>
-    /* --- General Styling & Variables --- */
-    :root {
-      --primary-dark: #0d1321;
-      --secondary-dark: #1d2d44;
-      --accent: #fca311;
-      --text-light: #e5e5e5;
-      --error: #f44336;
-      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-main);
-      line-height: 1.7;
-      background-color: var(--secondary-dark);
-      color: var(--text-light);
-    }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-    section { padding: 60px 0; }
-    h2, h3 { color: var(--accent); }
-    h2 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; }
-    h3 { font-size: 1.8rem; margin-top: 40px; margin-bottom: 15px; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Join Us | Rise and Shine Chess Club</title>
+    <meta name="description" content="Register to become a member of the Rise and Shine Chess Club. Fill out the form and join our passionate chess community in Nellmapius, Pretoria.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Styles for mobile navigation toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
 
-    /* --- Header & Navigation --- */
-    header { background-color: var(--primary-dark); padding: 15px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-    header .container { display: flex; justify-content: space-between; align-items: center; }
-    .logo img { height: 50px; width: auto; display: block; }
-    nav ul { list-style: none; display: flex; gap: 25px; }
-    nav a { color: var(--text-light); text-decoration: none; font-weight: 600; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: color 0.3s, border-color 0.3s; }
-    nav a:hover, nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
-    #menu-toggle { display: none; }
+        @media (max-width: 820px) {
+            header nav ul {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                background-color: #4a4a4a;
+                position: absolute;
+                top: 70px; /* Adjust based on header height */
+                left: 0;
+                padding: 1rem 0;
+                z-index: 999;
+            }
 
-    /* --- Join Page Specifics --- */
-    .join-content { max-width: 800px; margin: 0 auto; }
-    .join-content > p { text-align: center; font-size: 1.1rem; margin-bottom: 40px; }
-    .payment-info { background: var(--primary-dark); padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid var(--accent); }
-    .payment-info h4 { font-size: 1.5rem; margin-top: 0; margin-bottom: 15px; }
-    .payment-info ul { list-style: none; padding-left: 0; }
-    .payment-info li { margin-bottom: 8px; }
+            header nav.nav-active ul {
+                display: flex;
+            }
 
-    /* --- Form & Error Styling --- */
-    .error-summary { background: var(--error); color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
-    .error-summary ul { margin: 0; padding-left: 20px; }
-    .join-form { margin-top: 30px; display: grid; gap: 20px; }
-    .form-group { display: flex; flex-direction: column; }
-    .join-form label { font-weight: 700; margin-bottom: 5px; }
-    .join-form input, .join-form select { width: 100%; padding: 12px; background: #2a3a50; border: 1px solid #445; border-radius: 6px; color: var(--text-light); font-size: 1rem; }
-    .join-form .checkbox-label { flex-direction: row; align-items: center; gap: 10px; font-weight: normal; }
-    .join-form input[type="checkbox"] { width: auto; accent-color: var(--accent); transform: scale(1.2); }
-    .join-form button { display: inline-block; padding: 14px 28px; background-color: var(--accent); color: var(--primary-dark); font-weight: 700; border-radius: 30px; border: none; font-size: 1.1rem; cursor: pointer; margin-top: 20px; justify-self: start; }
-    .error-message { color: var(--error); font-weight: 600; font-size: 0.9rem; margin-top: 5px; }
+            .menu-toggle {
+                display: block;
+            }
+            
+            header {
+                justify-content: space-between;
+            }
+        }
+        
+        /* Join Page Specific Styles */
+        .payment-info {
+            background: #fff;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border-left: 5px solid var(--secondary-color);
+            box-shadow: var(--shadow);
+        }
+        .payment-info h4 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        .payment-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .payment-info li {
+            margin-bottom: 8px;
+        }
+        .error-summary {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #f5c6cb;
+        }
+        .error-summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .form-group.checkbox-label {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group.checkbox-label input {
+            width: auto;
+        }
+        .form-group.checkbox-label label {
+            margin-bottom: 0;
+        }
 
-    /* --- Footer --- */
-    footer { background-color: var(--primary-dark); text-align: center; padding: 20px 0; margin-top: 40px; border-top: 2px solid var(--accent); }
-
-    /* --- Responsive Design --- */
-    @media (max-width: 768px) {
-      nav ul { display: none; flex-direction: column; position: absolute; top: 70px; right: 0; background: var(--primary-dark); width: 100%; padding: 20px 0; text-align: center; }
-      nav ul.show { display: flex; }
-      #menu-toggle { display: block; background: none; border: none; color: var(--text-light); font-size: 2rem; cursor: pointer; }
-    }
-  </style>
-  <script src="join.js" defer></script>
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="container">
-    <a href="index.php" class="logo"><img src="logo.png" alt="Rise and Shine Chess Club Logo"></a>
-    <nav>
-      <button id="menu-toggle" aria-label="Open Menu">&#9776;</button>
-      <ul id="main-menu">
-        <li><a href="index.php">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="events.php">Events</a></li>
-        <li><a href="membership.html" class="active">Membership</a></li>
-        <li><a href="gallery.php">Gallery</a></li>
-        <li><a href="contact.php">Contact</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+    <header>
+        <div class="logo">
+            <a href="index.php"><img src="logo.png" alt="Rise and Shine Chess Club"></a>
+        </div>
+        <nav id="main-nav">
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="events.php">Events</a></li>
+                <li class="active"><a href="membership.php">Membership</a></li>
+                <li><a href="coaching.php">Coaching</a></li>
+                <li><a href="gallery.php">Gallery</a></li>
+                <li><a href="contact.php">Contact</a></li>
+            </ul>
+        </nav>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
 
-<main>
-  <section class="join">
-    <div class="container">
-      <div class="join-content">
+<main class="page-container">
+    <section class="content-section">
         <h2>Join Rise and Shine Chess Club</h2>
-        <p>Complete the form below to become a member and unlock access to coaching, tournaments, and a passionate chess community!</p>
+        <p class="section-intro">Complete the form below to become a member and unlock access to coaching, tournaments, and a passionate chess community!</p>
 
         <?php if (!empty($errors)): ?>
           <div class="error-summary">
-            <strong>Please correct the following errors:</strong>
-            <ul>
-              <?php foreach ($errors as $error): ?>
-                <li><?= htmlspecialchars($error) ?></li>
-              <?php endforeach; ?>
-            </ul>
+              <strong>Please correct the following errors:</strong>
+              <ul>
+                  <?php foreach ($errors as $error): ?>
+                      <li><?= htmlspecialchars($error) ?></li>
+                  <?php endforeach; ?>
+              </ul>
           </div>
         <?php endif; ?>
 
         <div class="payment-info">
-          <h4>Joining Fee Payment Instructions</h4>
-          <p>A once-off joining fee is required. Please make payment via EFT / Bank Transfer to:</p>
-          <ul>
-            <li><strong>Account Number:</strong> 1052515711</li>
-            <li><strong>Bank Name:</strong> CAPITEC BUSINESS</li>
-            <li><strong>Reference:</strong> Your Full Name</li>
-          </ul>
-          <p>Amount: <strong>R100</strong> (Under 10), <strong>R150</strong> (10–16), or <strong>R200</strong> (17+).</p>
+            <h4>Joining Fee Payment Instructions</h4>
+            <p>A once-off joining fee is required. Please make payment via EFT / Bank Transfer to:</p>
+            <ul>
+                <li><strong>Account Number:</strong> 1052515711</li>
+                <li><strong>Bank Name:</strong> CAPITEC BUSINESS</li>
+                <li><strong>Reference:</strong> Your Full Name</li>
+            </ul>
+            <p>Amount: <strong>R100</strong> (Under 10), <strong>R150</strong> (10–16), or <strong>R200</strong> (17+).</p>
         </div>
         
         <h3>Registration Form</h3>
-        <form class="join-form" id="joinForm" action="process_registration.php" method="POST" enctype="multipart/form-data" novalidate>
-          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-          
-          <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" name="fullName" required placeholder="E.g., John Doe" value="<?= htmlspecialchars($oldData['fullName'] ?? '') ?>">
-          </div>
-          
-          <div class="form-group">
-            <label for="age">Age</label>
-            <input type="number" id="age" name="age" min="5" max="99" required placeholder="Enter your current age" value="<?= htmlspecialchars($oldData['age'] ?? '') ?>">
-            <p id="feeMessage" style="color: var(--accent); font-weight: 600; margin-top: 8px; min-height: 1.2em;"></p>
-          </div>
-          
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required placeholder="E.g., your.email@example.com" value="<?= htmlspecialchars($oldData['email'] ?? '') ?>">
-          </div>
-          
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" placeholder="Optional" value="<?= htmlspecialchars($oldData['phone'] ?? '') ?>">
-          </div>
-          
-          <div class="form-group">
-            <label for="experience">Chess Experience</label>
-            <select id="experience" name="experience" required>
-              <option value="">-- Please select one --</option>
-              <option value="beginner" <?= (($oldData['experience'] ?? '') === 'beginner') ? 'selected' : '' ?>>Beginner (Just starting out)</option>
-              <option value="intermediate" <?= (($oldData['experience'] ?? '') === 'intermediate') ? 'selected' : '' ?>>Intermediate (Play casually)</option>
-              <option value="advanced" <?= (($oldData['experience'] ?? '') === 'advanced') ? 'selected' : '' ?>>Advanced (Play in tournaments)</option>
-            </select>
-          </div>
-          
-          <div class="form-group checkbox-label">
-            <input type="checkbox" id="joiningFee" name="joiningFee" required <?= isset($oldData['joiningFee']) ? 'checked' : '' ?>>
-            <label for="joiningFee">I understand I must pay the joining fee for my application to be approved.</label>
-          </div>
-          
-          <div class="form-group">
-            <label for="proof">Upload Proof of Payment (PDF, PNG, JPG)</label>
-            <input type="file" id="proof" name="proof" accept=".jpg,.jpeg,.png,.pdf" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="digitalSignature">Digital Signature (Type Your Full Name)</label>
-            <input type="text" id="digitalSignature" name="digitalSignature" required placeholder="Type your full name again to sign" value="<?= htmlspecialchars($oldData['digitalSignature'] ?? '') ?>">
-          </div>
-          
-          <button type="submit">Submit Registration</button>
+        <form class="styled-form" id="joinForm" action="process_registration.php" method="POST" enctype="multipart/form-data" novalidate>
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+            
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required placeholder="E.g., John Doe" value="<?= htmlspecialchars($oldData['fullName'] ?? '') ?>">
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" min="5" max="99" required placeholder="Enter your current age" value="<?= htmlspecialchars($oldData['age'] ?? '') ?>">
+                <p id="feeMessage" style="color: var(--secondary-color); font-weight: 600; margin-top: 8px; min-height: 1.2em;"></p>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="E.g., your.email@example.com" value="<?= htmlspecialchars($oldData['email'] ?? '') ?>">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Optional" value="<?= htmlspecialchars($oldData['phone'] ?? '') ?>">
+            </div>
+            
+            <div class="form-group">
+                <label for="experience">Chess Experience</label>
+                <select id="experience" name="experience" required>
+                    <option value="">-- Please select one --</option>
+                    <option value="beginner" <?= (($oldData['experience'] ?? '') === 'beginner') ? 'selected' : '' ?>>Beginner (Just starting out)</option>
+                    <option value="intermediate" <?= (($oldData['experience'] ?? '') === 'intermediate') ? 'selected' : '' ?>>Intermediate (Play casually)</option>
+                    <option value="advanced" <?= (($oldData['experience'] ?? '') === 'advanced') ? 'selected' : '' ?>>Advanced (Play in tournaments)</option>
+                </select>
+            </div>
+            
+            <div class="form-group checkbox-label">
+                <input type="checkbox" id="joiningFee" name="joiningFee" required <?= isset($oldData['joiningFee']) ? 'checked' : '' ?>>
+                <label for="joiningFee">I understand I must pay the joining fee for my application to be approved.</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="proof">Upload Proof of Payment (PDF, PNG, JPG)</label>
+                <input type="file" id="proof" name="proof" accept=".jpg,.jpeg,.png,.pdf" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="digitalSignature">Digital Signature (Type Your Full Name)</label>
+                <input type="text" id="digitalSignature" name="digitalSignature" required placeholder="Type your full name again to sign" value="<?= htmlspecialchars($oldData['digitalSignature'] ?? '') ?>">
+            </div>
+            
+            <button type="submit" class="btn">Submit Registration</button>
         </form>
-      </div>
-    </div>
-  </section>
+    </section>
 </main>
 
-<footer>
-  <div class="container">
-    <p>&copy; <?= date('Y') ?> Rise and Shine Chess Club | Designed by Mauwane Legacy Collective</p>
-  </div>
-</footer>
+    <footer class="footer-bottom">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="events.php">Upcoming Events</a></li>
+                    <li><a href="coaching.php">Coaching</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <p><i class="fas fa-phone"></i> <a href="tel:+27715399671">+27 71 539 9671</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
+                <p><i class="fas fa-map-marker-alt"></i> Nellmaphius, Pretoria, SA</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+             <p>&copy; <?= date('Y') ?> Rise and Shine Chess Club | Designed by Mauwane Legacy Collective</p>
+        </div>
+    </footer>
 
-<script>
-  // Mobile Menu Toggle
-  document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    menuToggle.addEventListener('click', () => mainMenu.classList.toggle('show'));
-  });
-</script>
+    <script src="join.js"></script>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNav = document.getElementById('main-nav');
 
+        if (menuToggle && mainNav) {
+            menuToggle.addEventListener('click', () => {
+                mainNav.classList.toggle('nav-active');
+            });
+        }
+    </script>
 </body>
 </html>
