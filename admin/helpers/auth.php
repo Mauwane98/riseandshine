@@ -6,6 +6,16 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
+ * Checks if user is logged in. If not, redirects to login page.
+ */
+function require_login() {
+    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        header('Location: login.php');
+        exit;
+    }
+}
+
+/**
  * Checks if the logged-in user has the required role to access a page.
  * If not, it redirects them or terminates the script.
  *

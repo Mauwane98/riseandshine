@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($users[$username]) && password_verify($password, $users[$username]['password_hash'])) {
         $_SESSION['username'] = $username;
+        $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_logged_in_user'] = $username;
         log_action("Login", $username . " logged in.");
         header('Location: index.php');
