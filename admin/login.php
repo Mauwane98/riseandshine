@@ -5,7 +5,7 @@ $users_file = 'data/users.csv';
 $error_message = '';
 
 // If user is already logged in, redirect to dashboard
-if (isset($_SESSION['username'])) {
+if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header('Location: index.php');
     exit;
 }
