@@ -2,6 +2,10 @@
 // Validate and process contact form submission
 require_once 'honeypot.php';
 
+// PHPMailer use statements
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 // Security headers
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
@@ -55,9 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $timestamp = date('Y-m-d H:i:s');
 
     // --- Send email notification to admin ---
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
-
     require 'PHPMailer/src/Exception.php';
     require 'PHPMailer/src/PHPMailer.php';
     require 'PHPMailer/src/SMTP.php';
