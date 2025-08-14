@@ -1,70 +1,139 @@
 <?php
-// process_registration.php
-
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-    die("Invalid request or CSRF token.");
-}
-
+// --- PHPMailer Integration ---
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
-require 'PHPMailer/src/Exception.php';
 
-// --- PATHS AND DIRECTORIES ---
-$data_dir = __DIR__ . '/admin/data/';
-$upload_dir = __DIR__ . '/admin/uploads/';
-$csvFile = $data_dir . 'registrations.csv';
+// --- Basic Validation ---
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if all required fields are present and not empty
+    $required_fields = ['name', 'email', 'phone', 'dob', 'membership_type'];
+    foreach ($required_fields as $field) {
+        if (empty($_POST[$field])) {
+            $_SESSION['error'] = 1;
+            $_SESSION['message'] = "Please fill in all required fields.";
+            header("Location: membership.php#join-form");
+            exit();
+        }
+    }
 
-if (!is_dir($data_dir)) mkdir($data_dir, 0755, true);
-if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+    // Sanitize input data
+    $name = filter_var(trim($_POST['name']), FILTER_SANITIZE_STRING);
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $phone = filter_var(trim($_POST['phone']), FILTER_SANITIZE_STRING);
+    $dob = trim($_POST['dob']); // Date validation is handled below
+    $membership_type = filter_var(trim($_POST['membership_type']), FILTER_SANITIZE_STRING);
+    $chess_experience = filter_var(trim($_POST['chess_experience']), FILTER_SANITIZE_STRING);
+    
+    // Validate email format
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = "Invalid email format.";
+        header("Location: membership.php#join-form");
+        exit();
+    }
 
-// --- HELPERS (omitted for brevity, assuming they exist) ---
-function clean_input($val) { return htmlspecialchars(stripslashes(trim($val)), ENT_QUOTES, 'UTF-8'); }
-function sendEmail($to, $name, $subject, $html, $plain = '') { /* ... email sending logic ... */ }
+    // Validate date of birth format (Y-m-d)
+    $d = DateTime::createFromFormat('Y-m-d', $dob);
+    if (!$d || $d->format('Y-m-d') !== $dob) {
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = "Invalid date of birth format. Please use YYYY-MM-DD.";
+        header("Location: membership.php#join-form");
+        exit();
+    }
 
-// --- VALIDATION (omitted for brevity, assuming it exists) ---
-$errors = [];
-$fullName = clean_input($_POST['fullName'] ?? '');
-// ... other validation logic ...
+    // --- Data Storage ---
+    $file_path = 'admin/data/registrations.csv';
+    $file = fopen($file_path, 'a'); // 'a' for append
 
-if (!empty($errors)) {
-    $_SESSION['form_errors'] = $errors;
-    $_SESSION['old_form_data'] = $_POST;
-    header('Location: join.php');
-    exit;
+    if ($file) {
+        $registration_id = uniqid();
+        $registration_data = [
+            $registration_id,
+            $name,
+            $email,
+            $phone,
+            $dob,
+            $membership_type,
+            $chess_experience,
+            'pending', // Default status
+            date('Y-m-d H:i:s') // Registration timestamp
+        ];
+
+        fputcsv($file, $registration_data);
+        fclose($file);
+
+        // --- Email Notification Logic ---
+        $mail = new PHPMailer(true);
+        try {
+            //Server settings
+            $mail->isSMTP();
+            $mail->Host       = 'cp62.domains.co.za'; // Updated Host
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'info@riseandshinechess.co.za';
+            $mail->Password   = 'Rise&Shine02';      // Updated Password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+
+            // --- Admin Notification Email ---
+            $mail->setFrom('info@riseandshinechess.co.za', 'Rise and Shine Chess Club');
+            $mail->addAddress('info@riseandshinechess.co.za', 'Admin'); // Send to admin
+            $mail->addReplyTo($email, $name);
+            
+            $mail->isHTML(true);
+            $mail->Subject = 'New Membership Application: ' . $name;
+            $mail->Body    = "A new membership application has been submitted.<br><br>" .
+                             "<b>Name:</b> {$name}<br>" .
+                             "<b>Email:</b> {$email}<br>" .
+                             "<b>Phone:</b> {$phone}<br>" .
+                             "<b>Date of Birth:</b> {$dob}<br>" .
+                             "<b>Membership Type:</b> {$membership_type}<br>" .
+                             "<b>Chess Experience:</b> {$chess_experience}<br>" .
+                             "<b>Registration ID:</b> {$registration_id}<br><br>" .
+                             "You can review and approve this application in the admin panel.";
+            $mail->send();
+
+            // --- User Confirmation Email ---
+            $mail->clearAddresses(); // Clear recipients for the next email
+            $mail->addAddress($email, $name); // Send to the user
+            
+            $mail->Subject = 'Your Membership Application has been Received!';
+            $mail->Body    = "Dear {$name},<br><br>" .
+                             "Thank you for applying for a membership at the Rise and Shine Chess Club! We have successfully received your application.<br><br>" .
+                             "Your application details:<br>" .
+                             "<b>Membership Type:</b> {$membership_type}<br>" .
+                             "<b>Registration ID:</b> {$registration_id}<br><br>" .
+                             "Our team will review your application and get back to you shortly. We look forward to welcoming you to the club!<br><br>" .
+                             "Sincerely,<br>" .
+                             "The Rise and Shine Chess Club Team";
+            $mail->send();
+
+        } catch (Exception $e) {
+            // Optional: Log the error, but don't block the user
+            // For example: error_log("Mailer Error: {$mail->ErrorInfo}");
+        }
+
+        // --- Set Success Message and Redirect ---
+        $_SESSION['message'] = "Thank you for your application! We have received it and will be in touch shortly.";
+        unset($_SESSION['error']);
+        header("Location: success.php");
+        exit();
+
+    } else {
+        // --- Set Error Message and Redirect ---
+        $_SESSION['error'] = 1;
+        $_SESSION['message'] = "Error: Could not save your application. Please try again later.";
+        header("Location: membership.php#join-form");
+        exit();
+    }
+} else {
+    // Redirect if accessed directly without POST method
+    header("Location: membership.php");
+    exit();
 }
-
-// --- FILE UPLOAD & DATA SAVING ---
-$fee = ($age < 10) ? 100 : (($age <= 16) ? 150 : 200);
-$safeName = uniqid() . '-' . preg_replace('/[^A-Za-z0-9_\-\.]/', '_', basename($_FILES['proof']['name']));
-$targetPath = $upload_dir . $safeName;
-
-if (!move_uploaded_file($_FILES['proof']['tmp_name'], $targetPath)) {
-    // ... error handling ...
-    header('Location: join.php');
-    exit;
-}
-
-// Store data in CSV
-$timestamp = date('Y-m-d H:i:s');
-$rowData = [$fullName, $age, $email, $phone, $experience, $fee, $safeName, $timestamp, 'Pending'];
-$header = ['Full Name', 'Age', 'Email', 'Phone', 'Experience', 'Joining Fee', 'Proof File', 'Timestamp', 'Status'];
-
-if (!file_exists($csvFile)) {
-    $handle = fopen($csvFile, 'w');
-    fputcsv($handle, $header);
-    fclose($handle);
-}
-
-$handle = fopen($csvFile, 'a');
-fputcsv($handle, $rowData);
-fclose($handle);
-
-// --- EMAIL NOTIFICATIONS (omitted for brevity) ---
-// ... send emails ...
-
-header('Location: success.php');
-exit;
+?>

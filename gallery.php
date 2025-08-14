@@ -1,258 +1,165 @@
 <?php
-/**
- * Loads and groups gallery images by category from a CSV file.
- * @param string $filePath Path to the gallery.csv file.
- * @return array An array of images grouped by category.
- */
-function get_gallery_images_by_category(string $filePath): array {
-    $images_by_category = [];
-    if (!file_exists($filePath)) {
-        return [];
-    }
-    if (($handle = fopen($filePath, 'r')) !== false) {
-        while (($data = fgetcsv($handle)) !== false) {
-            if (isset($data[0])) {
-                $image = [
-                    'file' => $data[0],
-                    'caption' => $data[1] ?? '',
-                    'category' => trim($data[2] ?? 'General')
+function getGallery() {
+    $filePath = 'admin/data/gallery.csv';
+    $images = [];
+    if (file_exists($filePath) && ($handle = fopen($filePath, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header row
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            if (count($data) >= 3) {
+                $images[] = [
+                    'id' => htmlspecialchars($data[0]),
+                    'filename' => htmlspecialchars($data[1]),
+                    'caption' => htmlspecialchars($data[2])
                 ];
-                // Group images by their category
-                $images_by_category[$image['category']][] = $image;
             }
         }
         fclose($handle);
     }
-    // Sort categories alphabetically
-    ksort($images_by_category);
-    return $images_by_category;
+    // Reverse the array to show newest uploads first
+    return array_reverse($images);
 }
 
-// --- Updated path to gallery.csv ---
-$images_grouped = get_gallery_images_by_category(__DIR__ . '/admin/data/gallery.csv');
-$categories = array_keys($images_grouped);
+$galleryImages = getGallery();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gallery | Rise and Shine Chess Club</title>
-  <meta name="description" content="Explore the gallery of the Rise and Shine Chess Club, featuring photos from our tournaments, training sessions, and community events.">
-  <style>
-    :root {
-      --primary-dark: #0d1321;
-      --secondary-dark: #1d2d44;
-      --accent: #fca311;
-      --text-light: #e5e5e5;
-      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--font-main);
-      line-height: 1.7;
-      background-color: var(--secondary-dark);
-      color: var(--text-light);
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    section { padding: 60px 0; }
-    h2 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; color: var(--accent); }
-    h3 { font-size: 1.8rem; margin-bottom: 20px; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
-    .intro-text { text-align: center; font-size: 1.1rem; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Rise and Shine Chess Club</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Styles for mobile navigation toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
 
-    header {
-      background-color: var(--primary-dark); padding: 15px 0; position: sticky;
-      top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    header .container { display: flex; justify-content: space-between; align-items: center; }
-    .logo img { height: 50px; width: auto; display: block; }
-    nav ul { list-style: none; display: flex; gap: 25px; }
-    nav a { color: var(--text-light); text-decoration: none; font-weight: 600; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: color 0.3s, border-color 0.3s; }
-    nav a:hover, nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
-    #menu-toggle { display: none; }
+        @media (max-width: 820px) {
+            header nav ul {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                background-color: #4a4a4a;
+                position: absolute;
+                top: 70px; /* Adjust based on header height */
+                left: 0;
+                padding: 1rem 0;
+                z-index: 999;
+            }
 
-    .category-filters {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-    .filter-btn {
-        background: var(--secondary-dark);
-        color: var(--text-light);
-        border: 2px solid var(--accent);
-        padding: 10px 20px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 600;
-        margin: 5px;
-        transition: all 0.3s;
-    }
-    .filter-btn:hover, .filter-btn.active {
-        background: var(--accent);
-        color: var(--primary-dark);
-    }
+            header nav.nav-active ul {
+                display: flex;
+            }
 
-    .gallery-category-group { margin-bottom: 50px; }
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-    .gallery-item {
-      background: var(--primary-dark); border-radius: 8px; overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.3s ease;
-      cursor: pointer; display: flex; flex-direction: column;
-    }
-    .gallery-item:hover { transform: translateY(-5px); }
-    .gallery-item img { width: 100%; height: 250px; object-fit: cover; display: block; }
-    .caption { padding: 15px; font-weight: 600; min-height: 60px; }
-    .no-images { text-align: center; padding: 40px; background: var(--primary-dark); border-radius: 10px; }
-
-    .lightbox {
-      position: fixed; display: none; justify-content: center; align-items: center;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px;
-    }
-    .lightbox img { max-width: 90%; max-height: 90vh; border-radius: 8px; }
-    .lightbox .close { position: absolute; top: 20px; right: 30px; font-size: 2.5rem; color: #fff; cursor: pointer; line-height: 1; }
-
-    footer {
-      background-color: var(--primary-dark); text-align: center;
-      padding: 20px 0; margin-top: 60px; border-top: 2px solid var(--accent);
-    }
-
-    @media (max-width: 768px) {
-      h2 { font-size: 2rem; }
-      nav ul { display: none; flex-direction: column; position: absolute; top: 70px; right: 0; background: var(--primary-dark); width: 100%; padding: 20px 0; text-align: center; }
-      nav ul.show { display: flex; }
-      #menu-toggle { display: block; background: none; border: none; color: var(--text-light); font-size: 2rem; cursor: pointer; }
-    }
-  </style>
+            .menu-toggle {
+                display: block;
+            }
+            
+            header {
+                justify-content: space-between;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<header>
-  <div class="container">
-    <a href="index.php" class="logo"><img src="logo.png" alt="Rise and Shine Chess Club Logo"></a>
-    <nav>
-      <button id="menu-toggle" aria-label="Open Menu">&#9776;</button>
-      <ul id="main-menu">
-        <li><a href="index.php">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="events.php">Events</a></li>
-        <li><a href="membership.html">Membership</a></li>
-        <li><a href="gallery.php" class="active">Gallery</a></li>
-        <li><a href="contact.php">Contact</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-<main>
-  <section class="gallery">
-    <div class="container">
-      <h2>Club Gallery</h2>
-      <p class="intro-text">Take a look at some of our events, tournaments, and community activities. Click on any image to view it larger.</p>
-
-      <?php if (!empty($categories)): ?>
-        <div class="category-filters">
-            <button class="filter-btn active" data-filter="all">Show All</button>
-            <?php foreach ($categories as $category): ?>
-                <button class="filter-btn" data-filter="<?= htmlspecialchars(strtolower(str_replace(' ', '-', $category))) ?>"><?= htmlspecialchars($category) ?></button>
-            <?php endforeach; ?>
+    <header>
+        <div class="logo">
+            <a href="index.php"><img src="logo.png" alt="Rise and Shine Chess Club"></a>
         </div>
-      <?php endif; ?>
+        <nav id="main-nav">
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="events.php">Events</a></li>
+                <li><a href="membership.php">Membership</a></li>
+                <li><a href="coaching.php">Coaching</a></li>
+                <li class="active"><a href="gallery.php">Gallery</a></li>
+                <li><a href="contact.php">Contact</a></li>
+            </ul>
+        </nav>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
 
-      <?php if (!empty($images_grouped)): ?>
-        <div id="gallery-container">
-            <?php foreach ($images_grouped as $category => $images): ?>
-                <div class="gallery-category-group" data-category="<?= htmlspecialchars(strtolower(str_replace(' ', '-', $category))) ?>">
-                    <h3><?= htmlspecialchars($category) ?></h3>
-                    <div class="gallery-grid">
-                        <?php foreach ($images as $img): ?>
-                            <div class="gallery-item">
-                                <img src="gallery_uploads/<?= htmlspecialchars($img['file']) ?>" alt="<?= htmlspecialchars($img['caption'] ?: 'Chess Club Image') ?>" loading="lazy" />
-                                <?php if (!empty($img['caption'])): ?>
-                                    <div class="caption"><?= htmlspecialchars($img['caption']) ?></div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+    <main class="page-container">
+        <section class="hero-section" style="background-image: url('chess-9536049_1920.jpg');">
+            <div class="hero-text">
+                <h1>Club Gallery</h1>
+                <p>Moments captured from our events and club nights.</p>
+            </div>
+        </section>
+
+        <section id="gallery-main" class="content-section">
+            <h2>Our Collection</h2>
+            <p class="section-intro">Browse through photos from our tournaments, coaching sessions, and community gatherings. Click on any image to view it in full size.</p>
+            
+            <?php if (empty($galleryImages)): ?>
+                <div class="no-events">
+                    <p>There are no photos in the gallery yet. Check back after our next event!</p>
                 </div>
-            <?php endforeach; ?>
+            <?php else: ?>
+                <div class="gallery-grid">
+                    <?php foreach ($galleryImages as $image): ?>
+                        <div class="gallery-item" data-src="gallery_uploads/<?php echo $image['filename']; ?>" data-caption="<?php echo $image['caption']; ?>">
+                            <img src="gallery_uploads/<?php echo $image['filename']; ?>" alt="<?php echo $image['caption']; ?>" onerror="this.onerror=null;this.src='https://placehold.co/400x400/333/FFF?text=Image+Not+Found';">
+                            <div class="overlay">
+                                <h4><?php echo $image['caption']; ?></h4>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="events.php">Upcoming Events</a></li>
+                    <li><a href="membership.php">Join Us</a></li>
+                    <li><a href="coaching.php">Coaching</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <p><i class="fas fa-phone"></i> <a href="tel:+27715399671">+27 71 539 9671</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
+                <p><i class="fas fa-map-marker-alt"></i> Nellmaphius, Pretoria, SA</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
         </div>
-      <?php else: ?>
-        <div class="no-images">
-          <p>Our gallery is currently empty. Photos from our events will be added soon!</p>
+        <div class="footer-bottom">
+            <p>&copy; <?php echo date("Y"); ?> Rise and Shine Chess Club (Est. 2024). All Rights Reserved.</p>
         </div>
-      <?php endif; ?>
-    </div>
-  </section>
-</main>
+    </footer>
+    <script src="gallery.js"></script>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNav = document.getElementById('main-nav');
 
-<div class="lightbox" id="lightbox">
-  <span class="close" id="closeLightbox" aria-label="Close image viewer">&times;</span>
-  <img id="lightboxImage" src="" alt="Full-size gallery image" />
-</div>
-
-<footer>
-  <div class="container">
-    <p>&copy; <?= date('Y') ?> Rise and Shine Chess Club | Designed by Mauwane Legacy Collective</p>
-  </div>
-</footer>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Mobile Menu Toggle
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => mainMenu.classList.toggle('show'));
-    }
-
-    // Gallery Filtering
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const galleryGroups = document.querySelectorAll('.gallery-category-group');
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Manage active button state
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            const filter = button.getAttribute('data-filter');
-
-            galleryGroups.forEach(group => {
-                if (filter === 'all' || group.getAttribute('data-category') === filter) {
-                    group.style.display = 'block';
-                } else {
-                    group.style.display = 'none';
-                }
+        if (menuToggle && mainNav) {
+            menuToggle.addEventListener('click', () => {
+                mainNav.classList.toggle('nav-active');
             });
-        });
-    });
-
-    // Lightbox
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightboxImage');
-    const closeBtn = document.getElementById('closeLightbox');
-
-    if (lightbox) {
-        document.querySelectorAll('.gallery-item img').forEach(img => {
-            img.addEventListener('click', () => {
-                lightboxImg.src = img.src;
-                lightbox.style.display = 'flex';
-            });
-        });
-        if(closeBtn) {
-            closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
         }
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) lightbox.style.display = 'none';
-        });
-    }
-  });
-</script>
-
+    </script>
 </body>
 </html>

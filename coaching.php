@@ -1,12 +1,12 @@
 <?php
-session_start();
+// You can add any necessary PHP logic here, like fetching coach data from a database.
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Rise and Shine Chess Club</title>
+    <title>Coaching - Rise and Shine Chess Club</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -41,7 +41,7 @@ session_start();
             .menu-toggle {
                 display: block;
             }
-
+            
             header {
                 justify-content: space-between;
             }
@@ -59,9 +59,9 @@ session_start();
                 <li><a href="about.php">About</a></li>
                 <li><a href="events.php">Events</a></li>
                 <li><a href="membership.php">Membership</a></li>
-                <li><a href="coaching.php">Coaching</a></li>
+                <li class="active"><a href="coaching.php">Coaching</a></li>
                 <li><a href="gallery.php">Gallery</a></li>
-                <li class="active"><a href="contact.php">Contact</a></li>
+                <li><a href="contact.php">Contact</a></li>
             </ul>
         </nav>
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
@@ -72,68 +72,54 @@ session_start();
     <main class="page-container">
         <section class="hero-section" style="background-image: url('chess-9536049_1920.jpg');">
             <div class="hero-text">
-                <h1>Get in Touch</h1>
-                <p>We'd love to hear from you. Ask a question or say hello!</p>
+                <h1>Chess Coaching</h1>
+                <p>Unlock your potential with our expert guidance.</p>
             </div>
         </section>
 
-        <section id="contact-details" class="content-section">
-            <h2>Contact Information</h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
-                <!-- Contact Form -->
-                <div style="flex: 2; min-width: 300px;">
-                    <h3>Send us a Message</h3>
-                     <?php
-                    if (isset($_SESSION['message'])) {
-                        echo '<div class="message ' . (isset($_SESSION['error']) ? 'error' : 'success') . '">' . $_SESSION['message'] . '</div>';
-                        unset($_SESSION['message']);
-                        unset($_SESSION['error']);
-                    }
-                    ?>
-                    <form action="process_contact.php" method="post" class="styled-form" style="margin: 0; padding:0;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Full Name</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject">Subject</label>
-                            <input type="text" id="subject" name="subject" value="<?php echo isset($_GET['subject']) ? htmlspecialchars($_GET['subject']) : ''; ?>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="6" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn">Send Message</button>
-                        </div>
-                    </form>
+        <section id="programs" class="content-section">
+            <h2>Our Coaching Programs</h2>
+            <p class="section-intro">We offer a range of coaching programs tailored to different skill levels, from absolute beginners to advanced tournament players. Our goal is to provide a structured and supportive learning environment.</p>
+            
+            <div class="coaching-programs">
+                <div class="program-card">
+                    <i class="fas fa-chess-pawn fa-3x"></i>
+                    <h3>Beginner's Bootcamp</h3>
+                    <p>Learn the fundamentals of chess, including rules, piece movement, basic tactics, and opening principles. Perfect for those new to the game.</p>
+                    <a href="contact.php?subject=Beginner's Bootcamp Inquiry" class="btn">Inquire Now</a>
                 </div>
-                <!-- Contact Info & Map -->
-                <div style="flex: 1; min-width: 300px;">
-                    <h3>Club Details</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong><br>Nellmaphius, Pretoria, South Africa</p>
-                    <p><i class="fas fa-phone"></i> <strong>Phone:</strong><br><a href="tel:+27715399671">+27 71 539 9671</a></p>
-                    <p><i class="fas fa-envelope"></i> <strong>Email:</strong><br><a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
+                <div class="program-card">
+                    <i class="fas fa-chess-knight fa-3x"></i>
+                    <h3>Intermediate Strategy</h3>
+                    <p>Develop your strategic thinking, positional understanding, and tactical vision. This program focuses on middlegame planning and endgame techniques.</p>
+                    <a href="contact.php?subject=Intermediate Strategy Inquiry" class="btn">Inquire Now</a>
+                </div>
+                <div class="program-card">
+                    <i class="fas fa-chess-king fa-3x"></i>
+                    <h3>Advanced Training</h3>
+                    <p>For the serious tournament player. This program involves deep opening preparation, advanced tactical patterns, and personalized game analysis.</p>
+                    <a href="contact.php?subject=Advanced Training Inquiry" class="btn">Inquire Now</a>
+                </div>
+            </div>
+        </section>
 
-                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px; margin-top: 1rem; background: #eee;">
-                       <iframe
-                            width="100%"
-                            height="100%"
-                            style="border:0; border-radius: 8px;"
-                            loading="lazy"
-                            allowfullscreen
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d57499.03433328813!2d28.33235314077983!3d-25.75294340332834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e955f560e293845%3A0x2f7f63813a44f843!2sNellmapius%2C%20Pretoria!5e0!3m2!1sen!2sza!4v1668602725555!5m2!1sen!2sza">
-                        </iframe>
+        <section id="coaches" class="content-section alt-bg">
+            <h2>Meet the Coach</h2>
+            <p class="section-intro">Our experienced and passionate coach is here to guide you on your chess journey.</p>
+
+            <div class="coach-profiles" style="justify-content: center;">
+                <div class="coach-card">
+                    <img src="https://placehold.co/200x200/EFEFEF/333?text=Coach" alt="Coach Khothatso Teddy Makoro">
+                    <div class="coach-info">
+                        <h3>Khothatso Teddy Makoro</h3>
+                        <p class="coach-title">Head Coach & Founder</p>
+                        <p>With a deep passion for developing new talent, Khothatso provides expert guidance tailored to each student's needs, helping them build a strong foundation and a love for the game.</p>
+                        <a href="contact.php?subject=Booking Inquiry for Khothatso Teddy Makoro" class="btn-secondary">Book a Session</a>
                     </div>
                 </div>
             </div>
         </section>
+
     </main>
 
     <footer>
@@ -143,8 +129,8 @@ session_start();
                 <ul>
                     <li><a href="events.php">Upcoming Events</a></li>
                     <li><a href="membership.php">Join Us</a></li>
-                    <li><a href="coaching.php">Coaching</a></li>
                     <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -166,7 +152,7 @@ session_start();
             <p>&copy; <?php echo date("Y"); ?> Rise and Shine Chess Club (Est. 2024). All Rights Reserved.</p>
         </div>
     </footer>
-     <script>
+    <script>
         const menuToggle = document.getElementById('menu-toggle');
         const mainNav = document.getElementById('main-nav');
 

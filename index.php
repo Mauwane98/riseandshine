@@ -1,365 +1,224 @@
 <?php
-// index.php
-
-// --- Data Loading Functions ---
-
-/**
- * Loads and filters upcoming events from a CSV file.
- * @param string $filePath Path to the events.csv file.
- * @return array An array of upcoming events, sorted by date.
- */
-function get_upcoming_events(string $filePath): array {
+// Function to get the latest events
+function getLatestEvents($limit = 3) {
+    $filePath = 'admin/data/events.csv';
     $events = [];
-    if (!file_exists($filePath)) {
-        return [];
-    }
-    if (($handle = fopen($filePath, 'r')) !== false) {
-        $header = fgetcsv($handle); // Skip header row
-        if (!$header) { fclose($handle); return []; }
-        
-        while (($data = fgetcsv($handle)) !== false) {
-            // Updated to handle 5 columns and check date
-            if (count($data) >= 5 && strtotime($data[1]) >= strtotime('today')) {
+    if (file_exists($filePath) && ($handle = fopen($filePath, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            if (count($data) >= 5 && strtotime($data[2]) >= time()) { // Only future events
                 $events[] = [
-                    'title'       => $data[0],
-                    'date'        => $data[1],
-                    'time'        => $data[2],
-                    'venue'       => $data[3],
-                    'description' => $data[4]
+                    'id' => htmlspecialchars($data[0]),
+                    'name' => htmlspecialchars($data[1]),
+                    'date' => htmlspecialchars($data[2]),
+                    'location' => htmlspecialchars($data[3]),
+                    'poster' => htmlspecialchars($data[5] ?? 'default.jpg')
                 ];
             }
         }
         fclose($handle);
     }
-    // Sort events by date, earliest first
-    usort($events, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
-    return $events;
+    // Sort by date, soonest first
+    usort($events, function($a, $b) {
+        return strtotime($a['date']) - strtotime($b['date']);
+    });
+    return array_slice($events, 0, $limit);
 }
 
-/**
- * Loads gallery images from a CSV file.
- * @param string $filePath Path to the gallery.csv file.
- * @return array An array of gallery images.
- */
-function get_gallery_images(string $filePath): array {
+// Function to get gallery images
+function getGalleryImages($limit = 4) {
+    $filePath = 'admin/data/gallery.csv';
     $images = [];
-    if (!file_exists($filePath)) {
-        return [];
-    }
-    if (($handle = fopen($filePath, 'r')) !== false) {
-        while (($data = fgetcsv($handle)) !== false) {
-            if (isset($data[0])) {
+    if (file_exists($filePath) && ($handle = fopen($filePath, "r")) !== FALSE) {
+        fgetcsv($handle); // Skip header
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+             if (count($data) >= 3) {
                 $images[] = [
-                    'file' => $data[0],
-                    'caption' => $data[1] ?? ''
+                    'id' => htmlspecialchars($data[0]),
+                    'filename' => htmlspecialchars($data[1]),
+                    'caption' => htmlspecialchars($data[2])
                 ];
             }
         }
         fclose($handle);
     }
-    return array_reverse($images); // Show newest first
+    // Shuffle and pick a few random ones
+    shuffle($images);
+    return array_slice($images, 0, $limit);
 }
 
-// --- Updated paths to data files ---
-$events = get_upcoming_events(__DIR__ . '/admin/data/events.csv');
-$images = get_gallery_images(__DIR__ . '/admin/data/gallery.csv');
-
+$latestEvents = getLatestEvents();
+$galleryImages = getGalleryImages();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rise and Shine Chess Club - Nellmapius, Pretoria</title>
-  <meta name="description" content="A community-focused chess club in Nellmapius, Pretoria, dedicated to fostering strategic thinking and intellectual growth for all ages.">
-  <style>
-    /* --- General Styling & Variables --- */
-    :root {
-      --primary-dark: #0d1321;
-      --secondary-dark: #1d2d44;
-      --accent: #fca311;
-      --text-light: #e5e5e5;
-      --text-dark: #333;
-      --bg-light: #ffffff;
-      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      --container-width: 1100px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--font-main);
-      line-height: 1.7;
-      background-color: var(--secondary-dark);
-      color: var(--text-light);
-    }
-    .container {
-      max-width: var(--container-width);
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    section { padding: 60px 0; }
-    h1, h2, h3, h4 { line-height: 1.3; }
-    h3 { font-size: 2rem; text-align: center; margin-bottom: 40px; color: var(--accent); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rise and Shine Chess Club - Nellmaphius, Pretoria</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Welcome to the Rise and Shine Chess Club in Nellmaphius, Pretoria. A development chess club registered with Tshwane Chess.">
+    <meta name="keywords" content="chess club, Pretoria chess, Nellmaphius chess, chess tournaments, learn chess, development chess">
+    <style>
+        /* Styles for mobile navigation toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
 
-    /* --- Header & Navigation --- */
-    header {
-      background-color: var(--primary-dark);
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    header .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        @media (max-width: 820px) {
+            header nav ul {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                background-color: #4a4a4a;
+                position: absolute;
+                top: 70px; /* Adjust based on header height */
+                left: 0;
+                padding: 1rem 0;
+                z-index: 999;
+            }
 
-    .logo img {
-      height: 60px;
-      width: auto;
-      display: block;
-    }
-    .logo { font-size: 1.5rem; color: var(--accent); }
-    nav ul { list-style: none; display: flex; gap: 25px; }
-    nav a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-weight: 600;
-      padding-bottom: 5px;
-      border-bottom: 2px solid transparent;
-      transition: color 0.3s, border-color 0.3s;
-    }
-    nav a:hover, nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
-    #menu-toggle { display: none; }
+            header nav.nav-active ul {
+                display: flex;
+            }
 
-    /* --- Buttons --- */
-    .btn {
-      display: inline-block;
-      padding: 12px 28px;
-      background-color: var(--accent);
-      color: var(--primary-dark);
-      text-decoration: none;
-      font-weight: 700;
-      border-radius: 30px;
-      transition: transform 0.3s, background-color 0.3s;
-      border: 2px solid var(--accent);
-    }
-    .btn:hover { transform: translateY(-3px); }
-    .btn-secondary { background: transparent; color: var(--accent); }
-
-    /* --- Hero Section --- */
-    .hero {
-      background: linear-gradient(rgba(13, 19, 33, 0.8), rgba(13, 19, 33, 0.8)), url('chess-9536049_1920.jpg') no-repeat center center/cover;
-      min-height: 80vh;
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: #fff;
-    }
-    .hero h2 { font-size: 3rem; margin-bottom: 15px; }
-    .hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px; }
-    .hero .btn { margin: 10px; }
-
-    /* --- Card & Grid Layouts --- */
-    .card {
-      background: var(--primary-dark);
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    .mission-vision .container, .event-grid, .gallery-grid {
-      display: grid;
-      gap: 30px;
-    }
-    .mission-vision .container { grid-template-columns: 1fr 1fr; }
-    .event-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-    .gallery-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-    .event-card h4, .mission-vision h4 { color: var(--accent); margin-bottom: 15px; font-size: 1.5rem; }
-    .event-card .event-details { font-weight: 600; color: #ccc; margin-bottom: 10px; }
-    .event-card .event-details span { display: block; margin-bottom: 5px; }
-
-    /* --- Specific Sections --- */
-    #about { background-color: var(--primary-dark); text-align: center; }
-    #about .btn { margin-top: 20px; }
-    #membership { text-align: center; }
-    #gallery .gallery-item img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 8px;
-      display: block;
-    }
-    #contact { background-color: var(--primary-dark); text-align: center; }
-
-    /* --- Footer --- */
-    footer {
-      background-color: var(--primary-dark);
-      text-align: center;
-      padding: 20px 0;
-      border-top: 2px solid var(--accent);
-    }
-
-    /* --- Responsive Design --- */
-    @media (max-width: 768px) {
-      h3 { font-size: 1.8rem; }
-      .hero h2 { font-size: 2.2rem; }
-      nav ul {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 70px;
-        right: 0;
-        background: var(--primary-dark);
-        width: 100%;
-        padding: 20px 0;
-        text-align: center;
-      }
-      nav ul.show { display: flex; }
-      #menu-toggle {
-        display: block;
-        background: none;
-        border: none;
-        color: var(--text-light);
-        font-size: 2rem;
-        cursor: pointer;
-      }
-      .mission-vision .container { grid-template-columns: 1fr; }
-    }
-  </style>
+            .menu-toggle {
+                display: block;
+            }
+            
+            header {
+                justify-content: space-between;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="logo">
+            <a href="index.php"><img src="logo.png" alt="Rise and Shine Chess Club"></a>
+        </div>
+        <nav id="main-nav">
+            <ul>
+                <li class="active"><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="events.php">Events</a></li>
+                <li><a href="membership.php">Membership</a></li>
+                <li><a href="coaching.php">Coaching</a></li>
+                <li><a href="gallery.php">Gallery</a></li>
+                <li><a href="contact.php">Contact</a></li>
+            </ul>
+        </nav>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
 
-<header>
-  <div class="container">
-    <a href="index.php" class="logo">
-      <img src="logo.png" alt="Rise and Shine Chess Club Logo">
-    </a>
-    
-    <nav>
-      <button id="menu-toggle" aria-label="Open Menu">&#9776;</button>
-      <ul id="main-menu">
-        <li><a href="index.php" class="active">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="events.php">Events</a></li>
-        <li><a href="membership.html">Membership</a></li>
-        <li><a href="gallery.php">Gallery</a></li>
-        <li><a href="contact.php">Contact</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-<main>
-  <section id="home" class="hero">
-    <div class="container">
-      <h2>Welcome to Rise and Shine Chess Club</h2>
-      <p>Inspiring growth, strategy, and community through chess in Nellmapius, Pretoria.</p>
-      <a href="membership.html" class="btn">Join the Club</a>
-      <a href="events.php" class="btn btn-secondary">View All Events</a>
-    </div>
-  </section>
-
-  <section id="about" class="about">
-    <div class="container">
-      <h3>About Our Club</h3>
-      <p>Rise and Shine Chess Club is a development-focused club registered with Tshwane Chess, founded in September 2024 to promote chess in Nellmapius and beyond.</p>
-      <a href="about.html" class="btn">Read Our Story</a>
-    </div>
-  </section>
-
-  <section class="mission-vision">
-    <div class="container">
-      <div class="card">
-        <h4>🎯 Our Mission</h4>
-        <p>To foster an inclusive community where people of all ages and skill levels can grow, learn, and excel through the game of chess.</p>
-      </div>
-      <div class="card">
-        <h4>👁️ Our Vision</h4>
-        <p>To become a leading hub of chess development and enthusiasm in our community, empowering individuals through intellectual growth and strategic thinking.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="events" class="events">
-    <div class="container">
-      <h3>Upcoming Events</h3>
-      <div class="event-grid">
-        <?php if (!empty($events)): ?>
-          <?php foreach (array_slice($events, 0, 3) as $event): ?>
-            <div class="card event-card">
-              <h4><?= htmlspecialchars($event['title']) ?></h4>
-              <div class="event-details">
-                  <span>📅 <?= date('F j, Y', strtotime($event['date'])) ?> at <?= date('g:i A', strtotime($event['time'])) ?></span>
-                  <span>📍 <?= htmlspecialchars($event['venue']) ?></span>
-              </div>
-              <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
+    <main>
+        <section class="hero-section" style="background-image: url('chess-9536049_1920.jpg');">
+            <div class="hero-text">
+                <h1>Rise and Shine Chess Club</h1>
+                <p>Nurturing Pretoria's Future Champions in Nellmaphius</p>
+                <a href="membership.php" class="btn">Join Today</a>
+                <a href="events.php" class="btn btn-secondary">View Events</a>
             </div>
-          <?php endforeach; ?>
-        <?php else: ?>
-          <p style="text-align:center; grid-column: 1 / -1;">No upcoming events scheduled at the moment. Please check back soon!</p>
-        <?php endif; ?>
-      </div>
-      <div style="text-align:center; margin-top: 40px;">
-        <a href="events.php" class="btn">View All Events</a>
-      </div>
-    </div>
-  </section>
+        </section>
 
-  <section id="membership" class="membership" style="background-color: var(--primary-dark);">
-    <div class="container">
-      <h3>Become a Member</h3>
-      <p>Join our vibrant chess community to access expert coaching, participate in tournaments, and connect with fellow enthusiasts. Open to all ages and skill levels!</p>
-      <a href="membership.html" class="btn" style="margin-top:20px;">Learn More & Join</a>
-    </div>
-  </section>
+        <div class="page-container">
+            <section id="mission" class="content-section alt-bg">
+                <h2>Our Mission</h2>
+                <p class="section-intro">The mission of the Rise and Shine Chess Club is to foster a vibrant and inclusive community where individuals of all ages and skill levels can discover, learn, and grow through the game of chess. We aim to cultivate critical thinking, sportsmanship, and perseverance, empowering our members to excel both on and off the chessboard.</p>
+            </section>
 
-  <section id="gallery" class="gallery-preview">
-    <div class="container">
-      <h3>From Our Gallery</h3>
-      <div class="gallery-grid">
-        <?php if (!empty($images)): ?>
-          <?php foreach (array_slice($images, 0, 3) as $img): ?>
-            <div class="gallery-item">
-              <img src="gallery_uploads/<?= htmlspecialchars($img['file']) ?>" alt="<?= htmlspecialchars($img['caption'] ?: 'Chess Club Image') ?>" loading="lazy" />
+            <section id="upcoming-events" class="content-section">
+                <h2>Upcoming Events</h2>
+                <?php if (!empty($latestEvents)): ?>
+                    <div class="event-grid">
+                        <?php foreach ($latestEvents as $event): ?>
+                            <div class="event-card">
+                                <div class="event-poster">
+                                    <img src="event_uploads/<?php echo $event['poster']; ?>" alt="<?php echo $event['name']; ?>" onerror="this.onerror=null;this.src='https://placehold.co/600x400/333/FFF?text=Event';">
+                                </div>
+                                <div class="event-details">
+                                    <h3 class="event-title"><?php echo $event['name']; ?></h3>
+                                    <p class="event-date"><i class="fas fa-calendar-alt"></i> <?php echo date('F j, Y', strtotime($event['date'])); ?></p>
+                                    <p class="event-location"><i class="fas fa-map-marker-alt"></i> <?php echo $event['location']; ?></p>
+                                    <a href="event_register.php?event_id=<?php echo $event['id']; ?>" class="btn">Learn More & Register</a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p style="text-align: center;">No new events are scheduled at the moment. Please check back soon!</p>
+                <?php endif; ?>
+            </section>
+
+            <section id="home-gallery" class="content-section alt-bg">
+                <h2>From Our Gallery</h2>
+                 <?php if (!empty($galleryImages)): ?>
+                    <div class="gallery-grid">
+                        <?php foreach ($galleryImages as $image): ?>
+                            <div class="gallery-item">
+                                <img src="gallery_uploads/<?php echo $image['filename']; ?>" alt="<?php echo $image['caption']; ?>">
+                                <div class="overlay"><h4><?php echo $image['caption']; ?></h4></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                         <a href="gallery.php" class="btn">View Full Gallery</a>
+                    </div>
+                <?php else: ?>
+                     <p style="text-align: center;">The gallery is currently empty. Photos from our events will appear here soon!</p>
+                <?php endif; ?>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="events.php">Upcoming Events</a></li>
+                    <li><a href="membership.php">Join Us</a></li>
+                    <li><a href="coaching.php">Coaching</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
+                </ul>
             </div>
-          <?php endforeach; ?>
-        <?php else: ?>
-          <p style="text-align:center;">Our gallery is currently empty. Photos from our events will be added soon!</p>
-        <?php endif; ?>
-      </div>
-      <div style="text-align:center; margin-top: 40px;">
-        <a href="gallery.php" class="btn">View Full Gallery</a>
-      </div>
-    </div>
-  </section>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <p><i class="fas fa-phone"></i> <a href="tel:+27715399671">+27 71 539 9671</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
+                <p><i class="fas fa-map-marker-alt"></i> Nellmaphius, Pretoria, SA</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <?php echo date("Y"); ?> Rise and Shine Chess Club (Est. 2024). All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNav = document.getElementById('main-nav');
 
-  <section id="contact" class="contact" style="background-color: var(--primary-dark);">
-    <div class="container">
-      <h3>Get In Touch</h3>
-      <p><strong>Email:</strong> info@riseandshinechess.co.za</p>
-      <p><strong>Phone:</strong> 071 539 9671/p>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="container">
-    <p>&copy; <?= date('Y') ?> Rise and Shine Chess Club | Designed by Mauwane Legacy Collective</p>
-  </div>
-</footer>
-
-<script>
-  // Mobile Menu Toggle
-  document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    menuToggle.addEventListener('click', function () {
-      mainMenu.classList.toggle('show');
-    });
-  });
-</script>
-
+        if (menuToggle && mainNav) {
+            menuToggle.addEventListener('click', () => {
+                mainNav.classList.toggle('nav-active');
+            });
+        }
+    </script>
 </body>
 </html>

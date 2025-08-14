@@ -1,12 +1,9 @@
-<?php
-session_start();
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Rise and Shine Chess Club</title>
+    <title>About Us - Rise and Shine Chess Club</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -56,12 +53,12 @@ session_start();
         <nav id="main-nav">
             <ul>
                 <li><a href="index.php">Home</a></li>
-                <li><a href="about.php">About</a></li>
+                <li class="active"><a href="about.php">About</a></li>
                 <li><a href="events.php">Events</a></li>
                 <li><a href="membership.php">Membership</a></li>
                 <li><a href="coaching.php">Coaching</a></li>
                 <li><a href="gallery.php">Gallery</a></li>
-                <li class="active"><a href="contact.php">Contact</a></li>
+                <li><a href="contact.php">Contact</a></li>
             </ul>
         </nav>
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
@@ -72,68 +69,51 @@ session_start();
     <main class="page-container">
         <section class="hero-section" style="background-image: url('chess-9536049_1920.jpg');">
             <div class="hero-text">
-                <h1>Get in Touch</h1>
-                <p>We'd love to hear from you. Ask a question or say hello!</p>
+                <h1>About Our Club</h1>
+                <p>A community built on a shared passion for chess in Pretoria.</p>
             </div>
         </section>
 
-        <section id="contact-details" class="content-section">
-            <h2>Contact Information</h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
-                <!-- Contact Form -->
-                <div style="flex: 2; min-width: 300px;">
-                    <h3>Send us a Message</h3>
-                     <?php
-                    if (isset($_SESSION['message'])) {
-                        echo '<div class="message ' . (isset($_SESSION['error']) ? 'error' : 'success') . '">' . $_SESSION['message'] . '</div>';
-                        unset($_SESSION['message']);
-                        unset($_SESSION['error']);
-                    }
-                    ?>
-                    <form action="process_contact.php" method="post" class="styled-form" style="margin: 0; padding:0;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Full Name</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject">Subject</label>
-                            <input type="text" id="subject" name="subject" value="<?php echo isset($_GET['subject']) ? htmlspecialchars($_GET['subject']) : ''; ?>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="6" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn">Send Message</button>
-                        </div>
-                    </form>
-                </div>
-                <!-- Contact Info & Map -->
+        <section id="our-story" class="content-section">
+            <h2>Our Story</h2>
+            <p class="section-intro">Established in September 2024, the Rise and Shine Chess Club is a development chess club based in Nellmaphius, Pretoria. We are officially registered with Tshwane Chess, the regional body for chess in our area. As a development club, our primary focus is on nurturing and training new and upcoming chess players, creating a strong foundation for the future of chess in our community.</p>
+            <p>Our club was founded by a group of passionate players who wanted to create a welcoming space for anyone interested in chess. We believe in the power of the game to teach critical thinking, discipline, and sportsmanship. We welcome everyone, from the curious beginner picking up a piece for the first time to the seasoned player looking for a competitive challenge.</p>
+        </section>
+
+        <section id="mission-vision" class="content-section alt-bg">
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 300px;">
-                    <h3>Club Details</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong><br>Nellmaphius, Pretoria, South Africa</p>
-                    <p><i class="fas fa-phone"></i> <strong>Phone:</strong><br><a href="tel:+27715399671">+27 71 539 9671</a></p>
-                    <p><i class="fas fa-envelope"></i> <strong>Email:</strong><br><a href="mailto:info@riseandshinechess.co.za">info@riseandshinechess.co.za</a></p>
-
-                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px; margin-top: 1rem; background: #eee;">
-                       <iframe
-                            width="100%"
-                            height="100%"
-                            style="border:0; border-radius: 8px;"
-                            loading="lazy"
-                            allowfullscreen
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d57499.03433328813!2d28.33235314077983!3d-25.75294340332834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e955f560e293845%3A0x2f7f63813a44f843!2sNellmapius%2C%20Pretoria!5e0!3m2!1sen!2sza!4v1668602725555!5m2!1sen!2sza">
-                        </iframe>
-                    </div>
+                    <h3><i class="fas fa-bullseye"></i> Our Mission</h3>
+                    <p>The mission of the Rise and Shine Chess Club is to foster a vibrant and inclusive community where individuals of all ages and skill levels can discover, learn, and grow through the game of chess. We aim to cultivate critical thinking, sportsmanship, and perseverance, empowering our members to excel both on and off the chessboard.</p>
+                </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <h3><i class="fas fa-eye"></i> Our Vision</h3>
+                    <p>Our vision is to be a leading hub for chess enthusiasm and development in our community, recognized for promoting intellectual growth, fostering strong social connections, and inspiring a lifelong passion for the game. We envision a future where the strategic lessons of chess empower every member to approach challenges with confidence and creativity.</p>
                 </div>
             </div>
         </section>
+
+        <section id="why-join" class="content-section">
+            <h2>Why Join Us?</h2>
+            <div class="coaching-programs">
+                <div class="program-card">
+                    <i class="fas fa-users fa-3x"></i>
+                    <h3>Community</h3>
+                    <p>Connect with fellow chess lovers in Nellmaphius and greater Pretoria. Make new friends and find new rivals in a supportive setting.</p>
+                </div>
+                <div class="program-card">
+                    <i class="fas fa-trophy fa-3x"></i>
+                    <h3>Development</h3>
+                    <p>As a development club, our focus is on you. We provide the tools and training to help new and upcoming players flourish.</p>
+                </div>
+                <div class="program-card">
+                    <i class="fas fa-graduation-cap fa-3x"></i>
+                    <h3>Growth</h3>
+                    <p>With access to experienced coaches and a community dedicated to learning, you'll have every opportunity to improve your game.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer>
@@ -143,8 +123,8 @@ session_start();
                 <ul>
                     <li><a href="events.php">Upcoming Events</a></li>
                     <li><a href="membership.php">Join Us</a></li>
-                    <li><a href="coaching.php">Coaching</a></li>
                     <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.php">Contact Us</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -166,7 +146,7 @@ session_start();
             <p>&copy; <?php echo date("Y"); ?> Rise and Shine Chess Club (Est. 2024). All Rights Reserved.</p>
         </div>
     </footer>
-     <script>
+    <script>
         const menuToggle = document.getElementById('menu-toggle');
         const mainNav = document.getElementById('main-nav');
 
