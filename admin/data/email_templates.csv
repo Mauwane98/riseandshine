@@ -1,0 +1,25 @@
+ID,Name,Subject,Body
+template_welcome,"Member Approval","Welcome to Rise & Shine Chess Club!","Dear {name},
+
+Congratulations! Your application to join the Rise & Shine Chess Club has been approved. We are thrilled to have you with us.
+
+Our weekly sessions are held at [Your Venue] every [Day] at [Time]. We look forward to seeing you there!
+
+Best regards,
+The Rise & Shine Team"
+template_rejection,"Application Unsuccessful","Update on your Rise & Shine Chess Club Application","Dear {name},
+
+Thank you for your interest in joining the Rise & Shine Chess Club. After reviewing your application, we are unable to approve it at this time due to [Reason - e.g., an issue with the proof of payment provided].
+
+Please feel free to contact us if you have any questions.
+
+Best regards,
+The Rise & Shine Team"
+template_suspension,"Membership Suspension","Notice of Membership Suspension","Dear {name},
+
+This email is to inform you that your membership with the Rise & Shine Chess Club has been temporarily suspended due to [Reason - e.g., a violation of club policy].
+
+Please contact the club administration to resolve this matter.
+
+Best regards,
+The Rise & Shine Team"

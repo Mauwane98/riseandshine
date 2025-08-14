@@ -1,0 +1,193 @@
+/* admin/style.css */
+
+:root {
+    --primary-dark: #0d1321;
+    --secondary-dark: #1d2d44;
+    --accent: #fca311;
+    --text-light: #e5e5e5;
+    --bg-main: #f4f7fc;
+    --text-dark: #333;
+    --border-color: #e1e1e1;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --status-pending: #e67e22;
+    --status-approved: #2ecc71;
+    --status-suspended: #f39c12;
+    --status-declined: #e74c3c;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    font-size: 16px;
+}
+
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--primary-dark);
+    color: var(--text-light);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar h3 {
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav a {
+    display: block;
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background-color: var(--accent);
+    color: var(--primary-dark);
+}
+
+/* --- Main Content --- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.main-header {
+    background: #fff;
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    flex-grow: 1;
+}
+
+.content {
+    padding: 30px;
+    flex: 1;
+}
+
+/* --- Mobile Menu Button --- */
+.mobile-menu-button {
+    display: none; /* Hidden on desktop */
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--primary-dark);
+    cursor: pointer;
+}
+
+/* --- General Components (Cards, Tables, etc.) --- */
+.card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.table-wrapper {
+    overflow-x: auto; /* Make tables scrollable on small screens */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Prevent table content from squishing too much */
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+table thead th {
+    background-color: #f9f9f9;
+    font-weight: 700;
+}
+
+/* Status Badges */
+.status-pending, .status-approved, .status-suspended, .status-declined {
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    text-align: center;
+    display: inline-block;
+}
+.status-pending { background-color: var(--status-pending); }
+.status-approved { background-color: var(--status-approved); }
+.status-suspended { background-color: var(--status-suspended); }
+.status-declined { background-color: var(--status-declined); }
+
+
+/* --- Responsive Design --- */
+@media (max-width: 992px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1000;
+        transform: translateX(-100%); /* Hidden by default on mobile */
+    }
+    .sidebar.is-open {
+        transform: translateX(0);
+    }
+    .mobile-menu-button {
+        display: block;
+    }
+    .main-content {
+        width: 100%;
+    }
+    .content {
+        padding: 20px;
+    }
+    .main-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .content {
+        padding: 15px;
+    }
+    .card {
+        padding: 15px;
+    }
+    .form-grid {
+        grid-template-columns: 1fr; /* Stack form fields on small screens */
+    }
+}

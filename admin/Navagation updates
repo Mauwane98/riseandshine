@@ -1,0 +1,119 @@
+<?php
+// admin/members.php (sidebar updated)
+// ... (rest of the file is the same)
+?>
+<aside class="sidebar">
+    <h3>Rise & Shine Admin</h3>
+    <nav>
+        <ul>
+            <li><a href="index.php">Dashboard</a></li>
+            <li><a href="members.php" class="active">Members</a></li>
+            <li><a href="events.php">Events</a></li>
+            <li><a href="gallery.php">Gallery</a></li>
+            <li><a href="messages.php">Messages</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="profile.php">Profile</a></li>
+            <li><a href="activity_log.php">Activity Log</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</aside>
+<?php
+// ... (rest of the file is the same)
+?>
+```php
+<?php
+// admin/events.php (sidebar updated)
+// ... (rest of the file is the same)
+?>
+<aside class="sidebar">
+    <h3>Rise & Shine Admin</h3>
+    <nav>
+        <ul>
+            <li><a href="index.php">Dashboard</a></li>
+            <li><a href="members.php">Members</a></li>
+            <li><a href="events.php" class="active">Events</a></li>
+            <li><a href="gallery.php">Gallery</a></li>
+            <li><a href="messages.php">Messages</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="profile.php">Profile</a></li>
+            <li><a href="activity_log.php">Activity Log</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</aside>
+<?php
+// ... (rest of the file is the same)
+?>
+```php
+<?php
+// admin/gallery.php (sidebar updated)
+// ... (rest of the file is the same)
+?>
+<aside class="sidebar">
+    <h3>Rise & Shine Admin</h3>
+    <nav>
+        <ul>
+            <li><a href="index.php">Dashboard</a></li>
+            <li><a href="members.php">Members</a></li>
+            <li><a href="events.php">Events</a></li>
+            <li><a href="gallery.php" class="active">Gallery</a></li>
+            <li><a href="messages.php">Messages</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="profile.php">Profile</a></li>
+            <li><a href="activity_log.php">Activity Log</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</aside>
+<?php
+// ... (rest of the file is the same)
+?>
+```php
+<?php
+// admin/profile.php (sidebar updated)
+// ... (rest of the file is the same)
+?>
+<aside class="sidebar">
+    <h3>Rise & Shine Admin</h3>
+    <nav>
+        <ul>
+            <li><a href="index.php">Dashboard</a></li>
+            <li><a href="members.php">Members</a></li>
+            <li><a href="events.php">Events</a></li>
+            <li><a href="gallery.php">Gallery</a></li>
+            <li><a href="messages.php">Messages</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="profile.php" class="active">Profile</a></li>
+            <li><a href="activity_log.php">Activity Log</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</aside>
+<?php
+// ... (rest of the file is the same)
+?>
+```php
+<?php
+// admin/activity_log.php (sidebar updated)
+// ... (rest of the file is the same)
+?>
+<aside class="sidebar">
+    <h3>Rise & Shine Admin</h3>
+    <nav>
+        <ul>
+            <li><a href="index.php">Dashboard</a></li>
+            <li><a href="members.php">Members</a></li>
+            <li><a href="events.php">Events</a></li>
+            <li><a href="gallery.php">Gallery</a></li>
+            <li><a href="messages.php">Messages</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="profile.php">Profile</a></li>
+            <li><a href="activity_log.php" class="active">Activity Log</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</aside>
+<?php
+// ... (rest of the file is the same)
+?>

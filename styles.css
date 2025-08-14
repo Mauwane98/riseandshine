@@ -1,0 +1,409 @@
+:root {
+  --primary: #0d1321;
+  --accent: #fca311;
+  --text: #e5e5e5;
+  --bg: #1a1a1a;
+  --card-bg: #252525;
+
+  /* Added for form inputs visibility */
+  --input-bg: #333333;
+  --input-border: #fca311;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+}
+
+header {
+  background: var(--primary);
+  padding: 1rem 0;
+  border-bottom: 2px solid var(--accent);
+}
+
+header .logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+
+nav ul li a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+  color: var(--accent);
+}
+
+.hero {
+  background: url('images/chess-9536049_1920.jpg') no-repeat center/cover;
+  color: #fff;
+  text-align: center;
+  padding: 6rem 2rem;
+}
+
+.hero h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: #000;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.3s ease;
+  margin: 0.5rem 0.5rem 0 0;
+}
+
+.btn:hover {
+  background: #ffc247;
+}
+
+section {
+  padding: 4rem 0;
+}
+
+section h2, section h3 {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.about, .membership, .events, .gallery-preview, .contact, .mission-vision {
+  background: var(--bg);
+}
+
+/* Join page checkbox and digital signature styles */
+
+.join-form .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.join-form .checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Digital signature input inherits from general inputs, no extra needed here */
+
+/* === Mission/Vision Section === */
+.mission-vision {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+/* === Modern Upcoming Events Section === */
+.events .event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.events .event-card {
+  background: linear-gradient(135deg, var(--card-bg), #2a2a2a);
+  border-left: 5px solid var(--accent);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.events .event-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.events .event-card h4 {
+  color: var(--accent);
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.events .event-card p {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+/* === Gallery Preview Section (Homepage) === */
+.gallery-preview .gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+.gallery-preview .gallery-item {
+  background: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-preview .gallery-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-preview .gallery-item img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid #333;
+}
+
+.gallery-preview .gallery-item .caption {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  background-color: #1a1a1a;
+}
+
+section.join {
+  background: var(--bg);
+  padding: 3rem 1rem 4rem;
+  flex-grow: 1;
+}
+
+.join h2,
+.join h3,
+.join h4 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.join p {
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  color: var(--text);
+}
+
+table thead tr {
+  background-color: var(--primary);
+  border-bottom: 3px solid var(--accent);
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  border: 1px solid #333;
+  text-align: left;
+  font-weight: 600;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #222;
+}
+
+.payment-info ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.join-form {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 600px;
+  margin-top: 2rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+}
+
+.join-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.join-form input[type="text"],
+.join-form input[type="email"],
+.join-form input[type="number"],
+.join-form input[type="tel"],
+.join-form input[type="file"],
+.join-form select {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 1.2rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.join-form input[type="text"]::placeholder,
+.join-form input[type="email"]::placeholder,
+.join-form input[type="number"]::placeholder,
+.join-form input[type="tel"]::placeholder,
+.join-form select::placeholder {
+  color: #bbb;
+}
+
+.join-form input[type="text"]:focus,
+.join-form input[type="email"]:focus,
+.join-form input[type="number"]:focus,
+.join-form input[type="tel"]:focus,
+.join-form input[type="file"]:focus,
+.join-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* === Footer === */
+footer {
+  background: var(--primary);
+  color: var(--text);
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+/* === Contact Form Section === */
+.contact-form {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 600px;
+  margin-top: 2rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+}
+
+.contact-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 1.2rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.contact-form input[type="text"]:focus,
+.contact-form input[type="email"]:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.contact-info {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.contact-info p strong {
+  color: var(--accent);
+}
+
+/* === Media Queries === */
+@media (min-width: 768px) {
+  header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  nav ul {
+    padding-top: 0;
+  }
+
+  .mission-vision {
+    flex-direction: row;
+  }
+
+  .mission-vision .card {
+    flex: 1;
+  }
+}
